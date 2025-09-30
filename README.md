@@ -14,6 +14,10 @@ cd playground && pnpm i && pnpm dev
 
 브라우저에서 `http://localhost:5173` 접속
 
+## 데모 영상
+https://github.com/user-attachments/assets/14789453-d2f0-47d4-840a-5c9041f353fe
+
+
 ## API
 
 ```ts
