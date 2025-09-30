@@ -6,15 +6,42 @@
   "author": "eunjin11 <whdmswls9207@gmail.com>",
   "license": "MIT",
   "description": "A simple DND library for web",
+  "homepage": "https://github.com/eunjin11/ddo-dnd",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eunjin11/ddo-dnd.git"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "dnd",
+    "draganddrop"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
-  "dependencies": {
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+  "main": "dist/ddo-dnd.umd.js",
+  "module": "dist/ddo-dnd.es.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/ddo-dnd.es.js",
+      "require": "./dist/ddo-dnd.umd.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

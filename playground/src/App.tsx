@@ -1,12 +1,12 @@
-import { useRef, useState } from "react";
-import "./App.css";
+import { useRef, useState } from 'react';
+import './App.css';
 import {
   DragContainer,
   DraggableItem,
   DraggingItem,
   useDragBlock,
   type BlockType,
-} from "../../src";
+} from '../../src';
 
 function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -19,9 +19,9 @@ function App() {
 
   const updateWorkBlockTimeOnServer = (updated: BlockType) => {
     // playground에서는 로그만 남깁니다
-    console.log("commit block (mock API):", updated);
-    setBlocks((prevBlocks) =>
-      prevBlocks.map((block) => (block.id === updated.id ? updated : block))
+    console.log('commit block (mock API):', updated);
+    setBlocks(prevBlocks =>
+      prevBlocks.map(block => (block.id === updated.id ? updated : block))
     );
   };
 
@@ -44,20 +44,20 @@ function App() {
       <DragContainer containerRef={containerRef}>
         <div
           style={{
-            position: "relative",
+            position: 'relative',
             width: 600,
             height: 320,
-            border: "1px dashed #999",
-            background: "#fafafa",
-            userSelect: "none",
+            border: '1px dashed #999',
+            background: '#fafafa',
+            userSelect: 'none',
           }}
         >
-          {blocks.map((block) => (
+          {blocks.map(block => (
             <DraggableItem
               key={block.id}
               position={block.position}
               isDragging={draggingBlock?.id === block.id}
-              handleStartDrag={(e) => {
+              handleStartDrag={(e: React.PointerEvent<HTMLDivElement>) => {
                 // React PointerEvent -> native PointerEvent로 변환 필요
                 // useDragBlock은 native PointerEvent를 받습니다
                 handleStartDrag(e.nativeEvent as PointerEvent, block);
@@ -68,12 +68,12 @@ function App() {
                   width: block.size.width,
                   height: block.size.height,
                   borderRadius: 8,
-                  border: "1px solid #ccc",
-                  background: "#fff",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  border: '1px solid #ccc',
+                  background: '#fff',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   fontSize: 14,
                 }}
               >
@@ -94,8 +94,8 @@ function App() {
                   width: draggingBlock.size.width,
                   height: draggingBlock.size.height,
                   borderRadius: 8,
-                  border: "1px solid #bbb",
-                  background: "rgba(100, 100, 255, 0.2)",
+                  border: '1px solid #bbb',
+                  background: 'rgba(100, 100, 255, 0.2)',
                 }}
               />
             </DraggingItem>
