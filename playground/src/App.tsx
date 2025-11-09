@@ -8,17 +8,43 @@ import {
   type BlockType,
 } from '../../src';
 
+interface MyBlock extends BlockType {
+  title: string;
+  color?: string;
+}
+
+const colorFromPosition = (pos: { x: number; y: number }) => {
+  const hue = Math.abs(pos.x * 37 + pos.y * 57) % 360;
+  return `hsl(${hue} 65% 60%)`;
+};
+
+const colorFromPositionAlpha = (pos: { x: number; y: number }, alpha = 0.2) => {
+  const hue = Math.abs(pos.x * 37 + pos.y * 57) % 360;
+  return `hsl(${hue} 65% 60% / ${alpha})`;
+};
+
 function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [scrollOffset] = useState(0);
 
-  const [blocks, setBlocks] = useState<BlockType[]>(() => [
-    { id: 1, position: { x: 40, y: 40 }, size: { width: 120, height: 60 } },
-    { id: 2, position: { x: 220, y: 40 }, size: { width: 120, height: 60 } },
+  const [blocks, setBlocks] = useState<MyBlock[]>(() => [
+    {
+      id: 1,
+      position: { x: 40, y: 40 },
+      size: { width: 120, height: 60 },
+      title: 'Block A',
+      color: '#fff',
+    },
+    {
+      id: 2,
+      position: { x: 220, y: 40 },
+      size: { width: 120, height: 60 },
+      title: 'Block B',
+      color: '#fff',
+    },
   ]);
 
-  const updateWorkBlockTimeOnServer = (updated: BlockType) => {
-    // playground에서는 로그만 남깁니다
+  const updateWorkBlockTimeOnServer = (updated: MyBlock) => {
     console.log('commit block (mock API):', updated);
     setBlocks(prevBlocks =>
       prevBlocks.map(block => (block.id === updated.id ? updated : block))
@@ -26,7 +52,7 @@ function App() {
   };
 
   const { draggingBlock, dragPointerPosition, handleStartDrag, dragOffset } =
-    useDragBlock({
+    useDragBlock<MyBlock>({
       containerRef,
       scrollOffset,
       workBlocks: blocks,
@@ -58,8 +84,6 @@ function App() {
               position={block.position}
               isDragging={draggingBlock?.id === block.id}
               handleStartDrag={(e: React.PointerEvent<HTMLDivElement>) => {
-                // React PointerEvent -> native PointerEvent로 변환 필요
-                // useDragBlock은 native PointerEvent를 받습니다
                 handleStartDrag(e.nativeEvent as PointerEvent, block);
               }}
             >
@@ -69,7 +93,7 @@ function App() {
                   height: block.size.height,
                   borderRadius: 8,
                   border: '1px solid #ccc',
-                  background: '#fff',
+                  background: colorFromPosition(block.position),
                   boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
                   display: 'flex',
                   alignItems: 'center',
@@ -77,7 +101,8 @@ function App() {
                   fontSize: 14,
                 }}
               >
-                Block {block.id}
+                {block.title} (X:{Math.round(block.position.x)} Y:
+                {Math.round(block.position.y)})
               </div>
             </DraggableItem>
           ))}
@@ -95,9 +120,19 @@ function App() {
                   height: draggingBlock.size.height,
                   borderRadius: 8,
                   border: '1px solid #bbb',
-                  background: 'rgba(100, 100, 255, 0.2)',
+                  background: colorFromPositionAlpha(
+                    draggingBlock.position,
+                    0.2
+                  ),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
-              />
+              >
+                {draggingBlock.title} (X:{Math.round(draggingBlock.position.x)}{' '}
+                Y:
+                {Math.round(draggingBlock.position.y)})
+              </div>
             </DraggingItem>
           )}
         </div>
