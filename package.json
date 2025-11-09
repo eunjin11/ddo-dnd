@@ -19,7 +19,8 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build:types": "tsc -p tsconfig.json",
+    "build": "vite build && pnpm run build:types",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",

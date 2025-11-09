@@ -6,7 +6,7 @@ import {
   DraggingItem,
   useDragBlock,
   type BlockType,
-} from '../../src';
+} from 'ddo-dnd';
 
 interface MyBlock extends BlockType {
   title: string;
