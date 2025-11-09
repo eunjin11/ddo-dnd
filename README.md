@@ -2,21 +2,21 @@
 
 > 또 쓰고 싶은 dnd 라이브러리, ddo-dnd
 
-간단한 React용 드래그앤드롭(DnD) 라이브러리입니다. 좌표 기반 드래그, 격자 스냅, 충돌 체크를 단순한 API로 제공합니다. 루트에는 라이브러리, `playground/`에는 실행 가능한 데모가 포함됩니다.
+A lightweight drag-and-drop (DnD) library for React. It offers coordinate-based dragging, grid snapping, and collision checking with a simple API. The repository root contains the library, and `playground/` contains a runnable demo.
 
-## 설치 & 실행
+## Install & Run
 
-개발 서버(플레이그라운드) 실행:
+Run the dev server (playground):
 
 ```bash
 cd playground && pnpm i && pnpm dev
 ```
 
-브라우저에서 `http://localhost:5173` 접속
+Open in your browser: `http://localhost:5173`
 
-## 데모 영상
+## Demo
+
 https://github.com/user-attachments/assets/14789453-d2f0-47d4-840a-5c9041f353fe
-
 
 ## API
 
@@ -30,50 +30,50 @@ import {
 import type { BlockType, Position, Size } from 'ddo-dnd';
 ```
 
-### 컴포넌트
+### Components
 
 - `DragContainer`
 
   - props: `{ containerRef: RefObject<HTMLDivElement|null>, children, onDrop?, onDragOver? }`
-  - 역할: 드래그 대상이 배치될 루트 컨테이너. 상대 좌표 계산 기준.
+  - Role: Root container where draggable items are placed; used as the coordinate reference.
 
 - `DraggableItem`
 
   - props: `{ position: Position, isDragging: boolean, handleStartDrag: (e: React.PointerEvent<HTMLDivElement>) => void, children }`
-  - 역할: 고정 스타일을 가지며 `position`을 기반으로 `transform` 이동. 드래그 시작 이벤트를 위로 전달.
+  - Role: Absolutely positioned item moved via `transform` based on `position`. Propagates the drag-start event upward.
 
 - `DraggingItem`
   - props: `{ position: Position, children }`
-  - 역할: 드래그 중 마우스/포인터를 따라다니는 고스트(포인터 이벤트 없음).
+  - Role: Ghost element that follows the pointer during dragging (no pointer events).
 
-### 훅
+### Hooks
 
 - `useDragBlock({ containerRef, scrollOffset, workBlocks, updateWorkBlockTimeOnServer, updateWorkBlocks })`
 
-  - 반환: `{ draggingBlock, dragPointerPosition, dragOffset, handleStartDrag }`
-  - 동작:
-    - 포인터 이동을 전역 리스너로 수신하고, `draggingBlock.position`을 스냅(`snapPositionToGrid`)해 갱신
-    - 드롭 시 범위 체크(`isInBound`) 후 충돌 처리(`resolveCollision`) → 애니메이션(`useBlocksTransition`) → 최종 커밋(`updateWorkBlockTimeOnServer`)
+  - Returns: `{ draggingBlock, dragPointerPosition, dragOffset, handleStartDrag }`
+  - Behavior:
+    - Receives pointer moves via global listeners and updates `draggingBlock.position` snapped with `snapPositionToGrid`
+    - On drop: bounds check (`isInBound`) → resolve collisions (`resolveCollision`) → animate (`useBlocksTransition`) → final commit (`updateWorkBlockTimeOnServer`)
 
 - `useBlocksTransition(updateWorkBlocks)`
 
-  - 반환: `{ animateBlocksTransition(prevBlocks, nextBlocks, durationMs=250) }`
-  - 역할: 이전/다음 블록 배열을 보간해 자연스러운 이동 애니메이션 적용 후 마지막에 `nextBlocks` 커밋.
+  - Returns: `{ animateBlocksTransition(prevBlocks, nextBlocks, durationMs=250) }`
+  - Role: Interpolates between previous and next block arrays to apply smooth movement animation, then commits `nextBlocks`.
 
 - `useSetPointerEvents({ onPointerMove?, onPointerUp? })`
-  - 역할: `window`에 포인터 이벤트 리스너를 등록/해제.
+  - Role: Registers/unregisters pointer event listeners on `window`.
 
-### 타입
+### Types
 
 - `BlockType`: `{ id: number; position: Position; size: Size }`
 - `Position`: `{ x: number; y: number }`
 - `Size`: `{ width: number; height: number }`
 
-### 유틸
+### Utils
 
-- `isInBound(position, block, scrollOffset, containerRect, defaultPosition, defaultPositionOffset?, directions?)`: 컨테이너 범위 체크
+- `isInBound(position, block, scrollOffset, containerRect, defaultPosition, defaultPositionOffset?, directions?)`: Container bounds check
 
-## 사용 예 (playground 발췌)
+## Example
 
 ```tsx
 <DragContainer containerRef={containerRef}>
@@ -97,22 +97,22 @@ import type { BlockType, Position, Size } from 'ddo-dnd';
         y: dragPointerPosition.y - dragOffset.y,
       }}
     >
-      {/* ghost content */}
+      {/* dragging content */}
     </DraggingItem>
   )}
 </DragContainer>
 ```
 
-## 개발 스크립트
+## Development scripts
 
-루트:
+Root:
 
 ```bash
 pnpm i
 pnpm build
 ```
 
-플레이그라운드:
+Playground:
 
 ```bash
 cd playground
@@ -120,6 +120,6 @@ pnpm i
 pnpm dev
 ```
 
-## 라이선스
+## License
 
 MIT
