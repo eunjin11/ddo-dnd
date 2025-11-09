@@ -2,7 +2,7 @@ import type { Position } from '../types/position.type';
 import type { Size } from '../types/size.type';
 import type { BlockType } from '../types/blockType.type';
 import type { RefObject } from 'react';
-import { getNewBlocks } from '../hooks/useDragBlock';
+import { getNewBlocks } from './blockUtils.ts';
 
 // 충돌 감지 함수
 export const hasCollision = (
@@ -24,9 +24,9 @@ export const hasCollision = (
   );
 };
 
-export const hasCollisionWithOthers = (
-  draggingBlock: BlockType,
-  workBlocks: BlockType[],
+export const hasCollisionWithOthers = <T extends BlockType>(
+  draggingBlock: T,
+  workBlocks: T[],
   draggingBlockId: number
 ): boolean => {
   return workBlocks.some(block => {
@@ -35,23 +35,23 @@ export const hasCollisionWithOthers = (
   });
 };
 
-interface ResolveCollisionParams {
-  activeBlock: BlockType;
-  workBlocks: BlockType[];
+interface ResolveCollisionParams<T extends BlockType> {
+  activeBlock: T;
+  workBlocks: T[];
   containerRef: RefObject<HTMLDivElement | null>;
   scrollOffset: number;
 }
 
-interface ResolveCollisionResult {
-  updatedBlock: BlockType;
-  sortedBlocks: BlockType[];
-  newBlocks: BlockType[];
+interface ResolveCollisionResult<T extends BlockType> {
+  updatedBlock: T;
+  sortedBlocks: T[];
+  newBlocks: T[];
 }
 
-export const resolveCollision = ({
+export const resolveCollision = <T extends BlockType>({
   activeBlock,
   workBlocks,
-}: ResolveCollisionParams): ResolveCollisionResult => {
+}: ResolveCollisionParams<T>): ResolveCollisionResult<T> => {
   // 해당 x좌표와 valid한 y좌표 조합에 블록이 이미 존재하는지 확인
   // 블록이 이미 있다면 y좌표를 증가하여 생성
   const otherBlocks = workBlocks.filter(b => b.id !== activeBlock.id);

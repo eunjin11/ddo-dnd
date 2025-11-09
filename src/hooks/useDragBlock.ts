@@ -6,33 +6,24 @@ import { useSetPointerEvents } from './useSetPointerEvents';
 import { snapPositionToGrid } from '../utils/snapToGridUtil';
 import type { BlockType } from '../types';
 import { resolveCollision } from '../utils';
+import { getNewBlocks } from '../utils/blockUtils.ts';
 
-interface UseDragBlockProps {
+interface UseDragBlockProps<T extends BlockType> {
   containerRef: RefObject<HTMLDivElement | null>;
   scrollOffset: number;
-  workBlocks: BlockType[];
-  updateWorkBlockTimeOnServer: (updatedBlock: BlockType) => void;
-  updateWorkBlocks: (blocks: BlockType[]) => void;
+  workBlocks: T[];
+  updateWorkBlockTimeOnServer: (updatedBlock: T) => void;
+  updateWorkBlocks: (blocks: T[]) => void;
 }
 
-export const getNewBlocks = (blocks: BlockType[], currentBlock: BlockType) => {
-  const newBlocks = blocks.map(block => {
-    if (block.id !== currentBlock.id) {
-      return block;
-    }
-    return currentBlock;
-  });
-  return newBlocks;
-};
-
-export const useDragBlock = ({
+export const useDragBlock = <T extends BlockType>({
   containerRef,
   scrollOffset,
   workBlocks,
   updateWorkBlockTimeOnServer,
   updateWorkBlocks,
-}: UseDragBlockProps) => {
-  const [draggingBlock, setDraggingBlock] = useState<BlockType | null>(null);
+}: UseDragBlockProps<T>) => {
+  const [draggingBlock, setDraggingBlock] = useState<T | null>(null);
   //렌더링 시에만 사용하는 위치, scrollOffset 보정 x
   const [dragPointerPosition, setDragPointerPosition] =
     useState<Position | null>(null);
@@ -41,8 +32,7 @@ export const useDragBlock = ({
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
 
   // 블록 이동 애니메이션 훅
-  const { animateBlocksTransition } =
-    useBlocksTransition<BlockType>(updateWorkBlocks);
+  const { animateBlocksTransition } = useBlocksTransition<T>(updateWorkBlocks);
 
   const getContainerCoords = useCallback(
     (e: PointerEvent) => {
@@ -54,7 +44,7 @@ export const useDragBlock = ({
   );
 
   const handleStartDrag = useCallback(
-    (e: PointerEvent, block: BlockType) => {
+    (e: PointerEvent, block: T) => {
       const containerCoords = getContainerCoords(e);
       const rect = containerRef.current?.getBoundingClientRect();
 
