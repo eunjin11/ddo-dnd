@@ -5,23 +5,46 @@ import type { RefObject } from 'react';
 import { getNewBlocks } from './blockUtils.ts';
 
 // 충돌 감지 함수
-export const hasCollision = (
+export const hasRectangleCollision = (
   currentBlock: { position: Position; size: Size },
   targetBlock: { position: Position; size: Size }
 ): boolean => {
-  const currentCenterX = currentBlock.position.x + currentBlock.size.width / 2;
-  const currentCenterY = currentBlock.position.y + currentBlock.size.height / 2;
+  // AABB: 사각형의 네 모서리(좌/우/상/하 경계)만 비교
+  const ax1 = currentBlock.position.x;
+  const ay1 = currentBlock.position.y;
+  const ax2 = ax1 + currentBlock.size.width;
+  const ay2 = ay1 + currentBlock.size.height;
 
-  const targetCenterX = targetBlock.position.x + targetBlock.size.width / 2;
-  const targetCenterY = targetBlock.position.y + targetBlock.size.height / 2;
+  const bx1 = targetBlock.position.x;
+  const by1 = targetBlock.position.y;
+  const bx2 = bx1 + targetBlock.size.width;
+  const by2 = by1 + targetBlock.size.height;
 
-  const distanceX = Math.abs(currentCenterX - targetCenterX);
-  const distanceY = Math.abs(currentCenterY - targetCenterY);
+  // 한 쪽이 다른 쪽의 바깥에 완전히 있는 경우 충돌 아님
+  if (ax2 <= bx1 || bx2 <= ax1 || ay2 <= by1 || by2 <= ay1) {
+    return false;
+  }
+  return true;
+};
 
-  return (
-    distanceX < currentBlock.size.width / 2 + targetBlock.size.width / 2 &&
-    distanceY < currentBlock.size.height / 2 + targetBlock.size.height / 2
-  );
+// 원(써클) 충돌 감지: 각 블록을 중심점과 반지름(가로/세로 중 더 작은 값의 절반)으로 환산해 거리 비교
+export const hasCircleCollision = (
+  currentBlock: { position: Position; size: Size },
+  targetBlock: { position: Position; size: Size }
+): boolean => {
+  const ax = currentBlock.position.x + currentBlock.size.width / 2;
+  const ay = currentBlock.position.y + currentBlock.size.height / 2;
+  const bx = targetBlock.position.x + targetBlock.size.width / 2;
+  const by = targetBlock.position.y + targetBlock.size.height / 2;
+
+  const ar = Math.min(currentBlock.size.width, currentBlock.size.height) / 2;
+  const br = Math.min(targetBlock.size.width, targetBlock.size.height) / 2;
+
+  const dx = ax - bx;
+  const dy = ay - by;
+  const distSq = dx * dx + dy * dy;
+  const radiusSum = ar + br;
+  return distSq < radiusSum * radiusSum;
 };
 
 export const hasCollisionWithOthers = <T extends BlockType>(
@@ -31,7 +54,7 @@ export const hasCollisionWithOthers = <T extends BlockType>(
 ): boolean => {
   return workBlocks.some(block => {
     if (block.id === draggingBlockId) return false;
-    return hasCollision(draggingBlock, block);
+    return hasRectangleCollision(draggingBlock, block);
   });
 };
 
