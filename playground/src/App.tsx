@@ -42,42 +42,47 @@ function App() {
       title: 'Block B',
       color: '#fff',
     },
+    {
+      id: 3,
+      position: { x: 40, y: 120 },
+      size: { width: 120, height: 60 },
+      title: 'Block C',
+      color: '#fff',
+    },
   ]);
 
-  const updateWorkBlockTimeOnServer = (updated: MyBlock) => {
+  const updateWorkBlockCallback = (updated: MyBlock) => {
     console.log('commit block (mock API):', updated);
     setBlocks(prevBlocks =>
       prevBlocks.map(block => (block.id === updated.id ? updated : block))
     );
   };
 
-  const { draggingBlock, dragPointerPosition, handleStartDrag, dragOffset } =
-    useDragBlock<MyBlock>({
-      containerRef,
-      scrollOffset,
-      workBlocks: blocks,
-      updateWorkBlockTimeOnServer,
-      updateWorkBlocks: setBlocks,
-    });
+  const {
+    draggingBlock,
+    dragPointerPosition,
+    handleStartDrag,
+    dragOffset,
+    collidedIds,
+  } = useDragBlock<MyBlock>({
+    containerRef,
+    scrollOffset,
+    workBlocks: blocks,
+    updateWorkBlockCallback,
+    updateWorkBlocks: setBlocks,
+    collisionOptions: {
+      enabled: true,
+      mode: 'rectangle',
+    },
+  });
 
   return (
-    <div style={{ padding: 24 }}>
+    <div className="app">
       <h2>ddo-dnd playground</h2>
-      <p style={{ marginBottom: 12 }}>
-        블록을 드래그하여 위치를 변경해 보세요.
-      </p>
+      <p className="subtitle">블록을 드래그하여 위치를 변경해 보세요.</p>
 
       <DragContainer containerRef={containerRef}>
-        <div
-          style={{
-            position: 'relative',
-            width: 600,
-            height: 320,
-            border: '1px dashed #999',
-            background: '#fafafa',
-            userSelect: 'none',
-          }}
-        >
+        <div className="board">
           {blocks.map(block => (
             <DraggableItem
               key={block.id}
@@ -88,17 +93,13 @@ function App() {
               }}
             >
               <div
+                className="draggable-block"
                 style={{
                   width: block.size.width,
                   height: block.size.height,
-                  borderRadius: 8,
-                  border: '1px solid #ccc',
-                  background: colorFromPosition(block.position),
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 14,
+                  background: collidedIds?.includes(block.id)
+                    ? 'red'
+                    : colorFromPosition(block.position),
                 }}
               >
                 {block.title} (X:{Math.round(block.position.x)} Y:
@@ -115,18 +116,13 @@ function App() {
               }}
             >
               <div
+                className="dragging-block"
                 style={{
                   width: draggingBlock.size.width,
                   height: draggingBlock.size.height,
-                  borderRadius: 8,
-                  border: '1px solid #bbb',
-                  background: colorFromPositionAlpha(
-                    draggingBlock.position,
-                    0.2
-                  ),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  background: collidedIds?.includes(draggingBlock.id)
+                    ? 'red'
+                    : colorFromPositionAlpha(draggingBlock.position, 0.2),
                 }}
               >
                 {draggingBlock.title} (X:{Math.round(draggingBlock.position.x)}{' '}
