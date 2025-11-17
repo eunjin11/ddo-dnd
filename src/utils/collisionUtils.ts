@@ -5,6 +5,16 @@ import type { RefObject } from 'react';
 import { getNewBlocks } from './blockUtils.ts';
 
 // 충돌 감지 함수
+export const hasCollision = (
+  currentBlock: { position: Position; size: Size },
+  targetBlock: { position: Position; size: Size },
+  collisionType: 'rectangle' | 'circle' = 'rectangle'
+): boolean => {
+  return collisionType === 'rectangle'
+    ? hasRectangleCollision(currentBlock, targetBlock)
+    : hasCircleCollision(currentBlock, targetBlock);
+};
+
 export const hasRectangleCollision = (
   currentBlock: { position: Position; size: Size },
   targetBlock: { position: Position; size: Size }
@@ -50,11 +60,12 @@ export const hasCircleCollision = (
 export const hasCollisionWithOthers = <T extends BlockType>(
   draggingBlock: T,
   workBlocks: T[],
-  draggingBlockId: number
+  draggingBlockId: number,
+  collisionType: 'rectangle' | 'circle' = 'rectangle'
 ): boolean => {
   return workBlocks.some(block => {
     if (block.id === draggingBlockId) return false;
-    return hasRectangleCollision(draggingBlock, block);
+    return hasCollision(draggingBlock, block, collisionType);
   });
 };
 
