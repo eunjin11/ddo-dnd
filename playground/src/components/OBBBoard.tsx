@@ -1,4 +1,4 @@
-import { type RefObject, useEffect, useState } from 'react';
+import { type RefObject } from 'react';
 import {
   DragContainer,
   DraggableItem,
@@ -6,6 +6,7 @@ import {
   useDragBlock,
   type BlockType,
 } from '../../../src';
+import { useRotateBlock } from '../../../src';
 import { colorFromPosition, colorFromPositionAlpha } from '../utils/color';
 
 type WithAngle = BlockType & { title: string; angle?: number };
@@ -23,12 +24,6 @@ const OBBBoard = <T extends WithAngle>({
   blocks,
   setBlocks,
 }: OBBBoardProps<T>) => {
-  const [rotating, setRotating] = useState<{
-    id: number;
-    angleStartDeg: number;
-    startPointerAngleRad: number;
-  } | null>(null);
-
   const updateWorkBlockCallback = (updated: T) => {
     setBlocks(prev => prev.map(b => (b.id === updated.id ? updated : b)));
   };
@@ -48,62 +43,18 @@ const OBBBoard = <T extends WithAngle>({
     collisionOptions: { enabled: true, mode: 'obb' },
   });
 
-  // 회전 핸들 pointermove/up 전역 처리
-  useEffect(() => {
-    if (!rotating) return;
-    const handleMove = (e: PointerEvent) => {
-      const targetBlock = blocks.find(b => Number(b.id) === rotating.id);
-      if (!targetBlock) return;
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const centerX =
-        rect.left + targetBlock.position.x + targetBlock.size.width / 2;
-      const centerY =
-        rect.top + targetBlock.position.y + targetBlock.size.height / 2;
-      const currentAngleRad = Math.atan2(
-        e.clientY - centerY,
-        e.clientX - centerX
-      );
-      const deltaRad = currentAngleRad - rotating.startPointerAngleRad;
-      const deltaDeg = (deltaRad * 180) / Math.PI;
-      const nextDeg = rotating.angleStartDeg + deltaDeg;
-      setBlocks(prev =>
-        prev.map(b =>
-          Number(b.id) === rotating.id ? { ...b, angle: nextDeg } : b
-        )
-      );
-    };
-    const handleUp = () => {
-      setRotating(null);
-      window.removeEventListener('pointermove', handleMove);
-      window.removeEventListener('pointerup', handleUp);
-    };
-    window.addEventListener('pointermove', handleMove);
-    window.addEventListener('pointerup', handleUp);
-    return () => {
-      window.removeEventListener('pointermove', handleMove);
-      window.removeEventListener('pointerup', handleUp);
-    };
-  }, [rotating, blocks, containerRef, setBlocks]);
-
-  const startRotate = (e: React.PointerEvent, block: T) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const centerX = rect.left + block.position.x + block.size.width / 2;
-    const centerY = rect.top + block.position.y + block.size.height / 2;
-    const startPointerAngleRad = Math.atan2(
-      e.clientY - centerY,
-      e.clientX - centerX
-    );
-    const angleStartDeg = block.angle ?? 0;
-    setRotating({
-      id: Number(block.id),
-      angleStartDeg,
-      startPointerAngleRad,
-    });
-  };
+  const {
+    rotatingBlock,
+    handleStartRotate,
+    collidedIds: rotatingCollidedIds,
+  } = useRotateBlock<T>({
+    containerRef,
+    workBlocks: blocks,
+    updateWorkBlocks: setBlocks,
+    scrollOffset,
+    updateWorkBlockCallback,
+    collisionOptions: { enabled: true, mode: 'obb' },
+  });
 
   const cornerHandleStyle: React.CSSProperties = {
     position: 'absolute',
@@ -112,7 +63,7 @@ const OBBBoard = <T extends WithAngle>({
     borderRadius: '50%',
     background: '#fff',
     border: '1px solid #000',
-    cursor: rotating ? 'grabbing' : 'grab',
+    cursor: rotatingBlock ? 'grabbing' : 'grab',
   };
 
   return (
@@ -122,7 +73,9 @@ const OBBBoard = <T extends WithAngle>({
           <DraggableItem
             key={block.id}
             position={block.position}
-            isDragging={draggingBlock?.id === block.id}
+            isDragging={
+              draggingBlock?.id === block.id || rotatingBlock?.id === block.id
+            }
             handleStartDrag={(e: React.PointerEvent<HTMLDivElement>) => {
               handleStartDrag(e.nativeEvent as PointerEvent, block);
             }}
@@ -135,9 +88,11 @@ const OBBBoard = <T extends WithAngle>({
                 height: block.size.height,
                 transform: `rotate(${block.angle ?? 0}deg)`,
                 transformOrigin: 'center',
-                background: collidedIds?.includes(block.id)
-                  ? 'red'
-                  : colorFromPosition(block.position),
+                background:
+                  collidedIds?.includes(block.id) ||
+                  rotatingCollidedIds?.includes(block.id)
+                    ? 'red'
+                    : colorFromPosition(block.position),
               }}
             >
               {block.title} (X:{Math.round(block.position.x)} Y:
@@ -146,25 +101,41 @@ const OBBBoard = <T extends WithAngle>({
               Angle: {Math.round(block.angle ?? 0)}deg
               <div
                 style={{ ...cornerHandleStyle, left: -5, top: -5 }}
-                onPointerDown={e => startRotate(e, block)}
+                onPointerDown={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStartRotate(e.nativeEvent as PointerEvent, block);
+                }}
               />
               <div
                 style={{ ...cornerHandleStyle, right: -5, top: -5 }}
-                onPointerDown={e => startRotate(e, block)}
+                onPointerDown={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStartRotate(e.nativeEvent as PointerEvent, block);
+                }}
               />
               <div
                 style={{ ...cornerHandleStyle, left: -5, bottom: -5 }}
-                onPointerDown={e => startRotate(e, block)}
+                onPointerDown={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStartRotate(e.nativeEvent as PointerEvent, block);
+                }}
               />
               <div
                 style={{ ...cornerHandleStyle, right: -5, bottom: -5 }}
-                onPointerDown={e => startRotate(e, block)}
+                onPointerDown={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStartRotate(e.nativeEvent as PointerEvent, block);
+                }}
               />
             </div>
           </DraggableItem>
         ))}
 
-        {dragPointerPosition && draggingBlock && (
+        {dragPointerPosition && draggingBlock && !rotatingBlock && (
           <DraggingItem
             position={{
               x: dragPointerPosition.x - dragOffset.x,
@@ -186,6 +157,31 @@ const OBBBoard = <T extends WithAngle>({
               {draggingBlock.title} (X:{Math.round(draggingBlock.position.x)} Y:
               {Math.round(draggingBlock.position.y)})
               <br /> Angle:{Math.round(draggingBlock.angle ?? 0)}deg
+            </div>
+          </DraggingItem>
+        )}
+        {rotatingBlock && (
+          <DraggingItem
+            position={{
+              x: rotatingBlock.position.x,
+              y: rotatingBlock.position.y,
+            }}
+          >
+            <div
+              className="dragging-block"
+              style={{
+                width: rotatingBlock.size.width,
+                height: rotatingBlock.size.height,
+                transform: `rotate(${rotatingBlock.angle ?? 0}deg)`,
+                transformOrigin: 'center',
+                background: collidedIds?.includes(rotatingBlock.id)
+                  ? 'red'
+                  : colorFromPositionAlpha(rotatingBlock.position, 0.2),
+              }}
+            >
+              {rotatingBlock.title} (X:{Math.round(rotatingBlock.position.x)} Y:
+              {Math.round(rotatingBlock.position.y)})
+              <br /> Angle:{Math.round(rotatingBlock.angle ?? 0)}deg
             </div>
           </DraggingItem>
         )}
