@@ -25,6 +25,7 @@ const colorFromPositionAlpha = (pos: { x: number; y: number }, alpha = 0.2) => {
 
 function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRefCircle = useRef<HTMLDivElement | null>(null);
   const [scrollOffset] = useState(0);
 
   const [blocks, setBlocks] = useState<MyBlock[]>(() => [
@@ -76,11 +77,51 @@ function App() {
     },
   });
 
+  const [blocksCircle, setBlocksCircle] = useState<MyBlock[]>(() => [
+    {
+      id: 101,
+      position: { x: 60, y: 60 },
+      size: { width: 100, height: 100 },
+      title: 'Circle A',
+      color: '#fff',
+    },
+    {
+      id: 102,
+      position: { x: 240, y: 60 },
+      size: { width: 80, height: 80 },
+      title: 'Circle B',
+      color: '#fff',
+    },
+  ]);
+
+  const updateWorkBlockCallbackCircle = (updated: MyBlock) => {
+    setBlocksCircle(prev => prev.map(b => (b.id === updated.id ? updated : b)));
+  };
+
+  const {
+    draggingBlock: draggingBlock2,
+    dragPointerPosition: dragPointerPosition2,
+    handleStartDrag: handleStartDrag2,
+    dragOffset: dragOffset2,
+    collidedIds: collidedIds2,
+  } = useDragBlock<MyBlock>({
+    containerRef: containerRefCircle,
+    scrollOffset,
+    workBlocks: blocksCircle,
+    updateWorkBlockCallback: updateWorkBlockCallbackCircle,
+    updateWorkBlocks: setBlocksCircle,
+    collisionOptions: {
+      enabled: true,
+      mode: 'circle',
+    },
+  });
+
   return (
     <div className="app">
       <h2>ddo-dnd playground</h2>
       <p className="subtitle">블록을 드래그하여 위치를 변경해 보세요.</p>
 
+      <h3 className="subtitle">Rectangle collision</h3>
       <DragContainer containerRef={containerRef}>
         <div className="board">
           {blocks.map(block => (
@@ -128,6 +169,62 @@ function App() {
                 {draggingBlock.title} (X:{Math.round(draggingBlock.position.x)}{' '}
                 Y:
                 {Math.round(draggingBlock.position.y)})
+              </div>
+            </DraggingItem>
+          )}
+        </div>
+      </DragContainer>
+
+      <h3 className="subtitle">Circle collision</h3>
+      <DragContainer containerRef={containerRefCircle}>
+        <div className="board">
+          {blocksCircle.map(block => (
+            <DraggableItem
+              key={block.id}
+              position={block.position}
+              isDragging={draggingBlock2?.id === block.id}
+              handleStartDrag={(e: React.PointerEvent<HTMLDivElement>) => {
+                handleStartDrag2(e.nativeEvent as PointerEvent, block);
+              }}
+            >
+              <div
+                className="draggable-block"
+                style={{
+                  width: block.size.width,
+                  height: block.size.height,
+                  background: collidedIds2?.includes(block.id)
+                    ? 'red'
+                    : colorFromPosition(block.position),
+                  borderRadius: '50%',
+                }}
+              >
+                {block.title} (X:{Math.round(block.position.x)} Y:
+                {Math.round(block.position.y)})
+              </div>
+            </DraggableItem>
+          ))}
+
+          {dragPointerPosition2 && draggingBlock2 && (
+            <DraggingItem
+              position={{
+                x: dragPointerPosition2.x - dragOffset2.x,
+                y: dragPointerPosition2.y - dragOffset2.y,
+              }}
+            >
+              <div
+                className="dragging-block"
+                style={{
+                  width: draggingBlock2.size.width,
+                  height: draggingBlock2.size.height,
+                  background: collidedIds2?.includes(draggingBlock2.id)
+                    ? 'red'
+                    : colorFromPositionAlpha(draggingBlock2.position, 0.2),
+                  borderRadius: '50%',
+                }}
+              >
+                {draggingBlock2.title} (X:
+                {Math.round(draggingBlock2.position.x)} Y:
+                {Math.round(draggingBlock2.position.y)})
               </div>
             </DraggingItem>
           )}
