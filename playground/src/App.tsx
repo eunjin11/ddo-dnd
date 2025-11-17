@@ -3,6 +3,7 @@ import './App.css';
 import { type BlockType } from '../../src';
 import RectangleBoard from './components/RectangleBoard';
 import CircleBoard from './components/CircleBoard';
+import OBBBoard from './components/OBBBoard';
 
 interface MyBlock extends BlockType {
   title: string;
@@ -40,6 +41,33 @@ function App() {
     },
   ]);
 
+  const [blocksOBB, setBlocksOBB] = useState<MyBlock[]>(() => [
+    {
+      id: 1,
+      position: { x: 40, y: 40 },
+      size: { width: 120, height: 60 },
+      angle: 0,
+      title: 'Block A',
+      color: '#fff',
+    },
+    {
+      id: 2,
+      position: { x: 220, y: 40 },
+      size: { width: 120, height: 60 },
+      angle: 0,
+      title: 'Block B',
+      color: '#fff',
+    },
+    {
+      id: 3,
+      position: { x: 40, y: 120 },
+      size: { width: 120, height: 60 },
+      angle: 0,
+      title: 'Block C',
+      color: '#fff',
+    },
+  ]);
+
   // kept for reference: updates happen inside board components
 
   const [blocksCircle, setBlocksCircle] = useState<MyBlock[]>(() => [
@@ -72,6 +100,14 @@ function App() {
         scrollOffset={scrollOffset}
         blocks={blocks}
         setBlocks={setBlocks}
+      />
+
+      <h3 className="subtitle">OBB collision</h3>
+      <OBBBoard<MyBlock>
+        containerRef={containerRef}
+        scrollOffset={scrollOffset}
+        blocks={blocksOBB}
+        setBlocks={setBlocksOBB}
       />
 
       <h3 className="subtitle">Circle collision</h3>

@@ -6,6 +6,7 @@ import {
 } from '../utils/collisionUtils';
 
 const block = (x: number, y: number, w: number, h: number) => ({
+  id: 1,
   position: { x, y },
   size: { width: w, height: h },
 });

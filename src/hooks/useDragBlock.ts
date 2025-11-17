@@ -5,10 +5,9 @@ import { useBlocksTransition } from './useBlocksTransition';
 import { useSetPointerEvents } from './useSetPointerEvents';
 import { snapPositionToGrid } from '../utils/snapToGridUtil';
 import type { BlockType } from '../types';
-import { resolveCollision } from '../utils';
+import { resolveCollision, type CollisionType } from '../utils';
 import { getNewBlocks } from '../utils/blockUtils.ts';
 import { useCollisionDetection } from './useCollisionDetection';
-import type { CollisionMode } from './useCollisionDetection';
 
 interface UseDragBlockProps<T extends BlockType> {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -18,7 +17,7 @@ interface UseDragBlockProps<T extends BlockType> {
   updateWorkBlocks: (blocks: T[]) => void;
   collisionOptions?: {
     enabled?: boolean;
-    mode?: CollisionMode;
+    mode?: CollisionType;
   };
   snapToGridOptions?: {
     enabled?: boolean;
@@ -46,7 +45,7 @@ export const useDragBlock = <T extends BlockType>({
     useCollisionDetection<T>();
 
   const enableCollision = collisionOptions?.enabled ?? false;
-  const collisionMode: CollisionMode = collisionOptions?.mode ?? 'rectangle';
+  const collisionType: CollisionType = collisionOptions?.mode ?? 'rectangle';
 
   const enableSnapToGrid = snapToGridOptions?.enabled ?? false;
   const gridSize = snapToGridOptions?.gridSize ?? 0;
@@ -150,6 +149,7 @@ export const useDragBlock = <T extends BlockType>({
       workBlocks,
       containerRef,
       scrollOffset,
+      collisionType,
     });
 
     animateBlocksTransition(newBlocks, sortedBlocks);
@@ -158,7 +158,7 @@ export const useDragBlock = <T extends BlockType>({
 
     if (enableCollision) {
       // enableCollision 옵션이 활성화되어 있으면 충돌 처리
-      computeCollisions(newBlocks, collisionMode);
+      computeCollisions(newBlocks, collisionType);
     }
   }, [
     animateBlocksTransition,
@@ -170,7 +170,7 @@ export const useDragBlock = <T extends BlockType>({
     computeCollisions,
     setCollidedIds,
     enableCollision,
-    collisionMode,
+    collisionType,
   ]);
 
   useSetPointerEvents({
