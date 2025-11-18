@@ -5,4 +5,5 @@ export interface BlockType {
   id: number;
   position: Position;
   size: Size;
+  angle?: number;
 }

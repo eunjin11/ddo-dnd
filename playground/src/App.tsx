@@ -1,36 +1,26 @@
 import { useRef, useState } from 'react';
 import './App.css';
-import {
-  DragContainer,
-  DraggableItem,
-  DraggingItem,
-  useDragBlock,
-  type BlockType,
-} from '../../src';
+import { type BlockType } from '../../src';
+import RectangleBoard from './components/RectangleBoard';
+import CircleBoard from './components/CircleBoard';
+import OBBBoard from './components/OBBBoard';
 
 interface MyBlock extends BlockType {
   title: string;
   color?: string;
 }
 
-const colorFromPosition = (pos: { x: number; y: number }) => {
-  const hue = Math.abs(pos.x * 37 + pos.y * 57) % 360;
-  return `hsl(${hue} 65% 60%)`;
-};
-
-const colorFromPositionAlpha = (pos: { x: number; y: number }, alpha = 0.2) => {
-  const hue = Math.abs(pos.x * 37 + pos.y * 57) % 360;
-  return `hsl(${hue} 65% 60% / ${alpha})`;
-};
+// color helpers moved to playground/src/utils/color.ts
 
 function App() {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRefCircle = useRef<HTMLDivElement | null>(null);
   const [scrollOffset] = useState(0);
 
   const [blocks, setBlocks] = useState<MyBlock[]>(() => [
     {
       id: 1,
-      position: { x: 40, y: 40 },
+      position: { x: 60, y: 30 },
       size: { width: 120, height: 60 },
       title: 'Block A',
       color: '#fff',
@@ -42,101 +32,98 @@ function App() {
       title: 'Block B',
       color: '#fff',
     },
+    {
+      id: 3,
+      position: { x: 40, y: 120 },
+      size: { width: 120, height: 60 },
+      title: 'Block C',
+      color: '#fff',
+    },
   ]);
 
-  const updateWorkBlockTimeOnServer = (updated: MyBlock) => {
-    console.log('commit block (mock API):', updated);
-    setBlocks(prevBlocks =>
-      prevBlocks.map(block => (block.id === updated.id ? updated : block))
-    );
-  };
+  const [blocksOBB, setBlocksOBB] = useState<MyBlock[]>(() => [
+    {
+      id: 4,
+      position: { x: 60, y: 40 },
+      size: { width: 120, height: 60 },
+      angle: 0,
+      title: 'Block A',
+      color: '#fff',
+    },
+    {
+      id: 5,
+      position: { x: 220, y: 60 },
+      size: { width: 120, height: 60 },
+      angle: 15,
+      title: 'Block B',
+      color: '#fff',
+    },
+    {
+      id: 6,
+      position: { x: 90, y: 140 },
+      size: { width: 120, height: 60 },
+      angle: -20,
+      title: 'Block C',
+      color: '#fff',
+    },
+  ]);
 
-  const { draggingBlock, dragPointerPosition, handleStartDrag, dragOffset } =
-    useDragBlock<MyBlock>({
-      containerRef,
-      scrollOffset,
-      workBlocks: blocks,
-      updateWorkBlockTimeOnServer,
-      updateWorkBlocks: setBlocks,
-    });
+  // kept for reference: updates happen inside board components
+
+  const [blocksCircle, setBlocksCircle] = useState<MyBlock[]>(() => [
+    {
+      id: 101,
+      position: { x: 60, y: 60 },
+      size: { width: 100, height: 100 },
+      title: 'Circle A',
+      color: '#fff',
+    },
+    {
+      id: 102,
+      position: { x: 240, y: 60 },
+      size: { width: 80, height: 80 },
+      title: 'Circle B',
+      color: '#fff',
+    },
+  ]);
+
+  // kept for reference: updates happen inside board components
 
   return (
-    <div style={{ padding: 24 }}>
+    <div className="app">
       <h2>ddo-dnd playground</h2>
-      <p style={{ marginBottom: 12 }}>
-        블록을 드래그하여 위치를 변경해 보세요.
-      </p>
+      <p className="subtitle">블록을 드래그하여 위치를 변경해 보세요.</p>
 
-      <DragContainer containerRef={containerRef}>
-        <div
-          style={{
-            position: 'relative',
-            width: 600,
-            height: 320,
-            border: '1px dashed #999',
-            background: '#fafafa',
-            userSelect: 'none',
-          }}
-        >
-          {blocks.map(block => (
-            <DraggableItem
-              key={block.id}
-              position={block.position}
-              isDragging={draggingBlock?.id === block.id}
-              handleStartDrag={(e: React.PointerEvent<HTMLDivElement>) => {
-                handleStartDrag(e.nativeEvent as PointerEvent, block);
-              }}
-            >
-              <div
-                style={{
-                  width: block.size.width,
-                  height: block.size.height,
-                  borderRadius: 8,
-                  border: '1px solid #ccc',
-                  background: colorFromPosition(block.position),
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 14,
-                }}
-              >
-                {block.title} (X:{Math.round(block.position.x)} Y:
-                {Math.round(block.position.y)})
-              </div>
-            </DraggableItem>
-          ))}
-
-          {dragPointerPosition && draggingBlock && (
-            <DraggingItem
-              position={{
-                x: dragPointerPosition.x - dragOffset.x,
-                y: dragPointerPosition.y - dragOffset.y,
-              }}
-            >
-              <div
-                style={{
-                  width: draggingBlock.size.width,
-                  height: draggingBlock.size.height,
-                  borderRadius: 8,
-                  border: '1px solid #bbb',
-                  background: colorFromPositionAlpha(
-                    draggingBlock.position,
-                    0.2
-                  ),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {draggingBlock.title} (X:{Math.round(draggingBlock.position.x)}{' '}
-                Y:
-                {Math.round(draggingBlock.position.y)})
-              </div>
-            </DraggingItem>
-          )}
+      <div className="board-row">
+        <div className="flex-column">
+          <h3 className="subtitle">Rectangle collision</h3>
+          <RectangleBoard<MyBlock>
+            containerRef={containerRef}
+            scrollOffset={scrollOffset}
+            blocks={blocks}
+            setBlocks={setBlocks}
+          />
         </div>
-      </DragContainer>
+
+        <div className="flex-column">
+          <h3 className="subtitle">OBB collision</h3>
+          <OBBBoard<MyBlock>
+            containerRef={containerRef}
+            scrollOffset={scrollOffset}
+            blocks={blocksOBB}
+            setBlocks={setBlocksOBB}
+          />
+        </div>
+      </div>
+      <div className="flex-column">
+        <h3 className="subtitle">Circle collision</h3>
+        <CircleBoard<MyBlock>
+          containerRef={containerRefCircle}
+          scrollOffset={scrollOffset}
+          blocks={blocksCircle}
+          setBlocks={setBlocksCircle}
+        />
+      </div>
     </div>
   );
 }
