@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       ddo-dnd:
-        specifier: link:..
-        version: link:..
+        specifier: 0.0.1
+        version: 0.0.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       next:
         specifier: 16.0.3
         version: 16.0.3(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1492,6 +1492,12 @@ packages:
 
   dayjs@1.11.19:
     resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
+
+  ddo-dnd@0.0.1:
+    resolution: {integrity: sha512-TgYw5EUt1DlJZFFIkrU9xFi7XOHEGJtiIGSeHist4vPPgLZiniXZVL6CUIeI3NBHc3itMEobCvY/HXJd2gJvew==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
 
   debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
@@ -4917,6 +4923,11 @@ snapshots:
       is-data-view: 1.0.2
 
   dayjs@1.11.19: {}
+
+  ddo-dnd@0.0.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
 
   debug@3.2.7:
     dependencies:
