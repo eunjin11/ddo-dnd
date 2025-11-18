@@ -1,3 +1,5 @@
+'use client';
+
 import { type RefObject } from 'react';
 import {
   DragContainer,
@@ -11,19 +13,19 @@ import { colorFromPosition, colorFromPositionAlpha } from '../utils/color';
 
 type WithTitle = BlockType & { title: string };
 
-interface RectangleBoardProps<T extends WithTitle> {
+interface CircleBoardProps<T extends WithTitle> {
   containerRef: RefObject<HTMLDivElement | null>;
   scrollOffset: number;
   blocks: T[];
   setBlocks: React.Dispatch<React.SetStateAction<T[]>>;
 }
 
-const RectangleBoard = <T extends WithTitle>({
+const CircleBoard = <T extends WithTitle>({
   containerRef,
   scrollOffset,
   blocks,
   setBlocks,
-}: RectangleBoardProps<T>) => {
+}: CircleBoardProps<T>) => {
   const updateWorkBlockCallback = (updated: T) => {
     setBlocks(prev => prev.map(b => (b.id === updated.id ? updated : b)));
   };
@@ -37,12 +39,12 @@ const RectangleBoard = <T extends WithTitle>({
       workBlocks: blocks,
       updateWorkBlockCallback,
       updateWorkBlocks: setBlocks,
-      collisionOptions: { enabled: true, mode: 'rectangle' },
+      collisionOptions: { enabled: true, mode: 'circle' },
     });
 
   return (
     <DragContainer containerRef={containerRef}>
-      <div className="board">
+      <div className="relative w-[600px] h-[320px] border border-dashed border-gray-400 bg-gray-100 select-none">
         {blocks.map(block => (
           <DraggableItem
             key={block.id}
@@ -53,13 +55,14 @@ const RectangleBoard = <T extends WithTitle>({
             }}
           >
             <div
-              className="draggable-block"
+              className="rounded-lg border border-gray-300 shadow flex items-center justify-center text-sm"
               style={{
                 width: block.size.width,
                 height: block.size.height,
                 background: collidedIds?.includes(block.id)
                   ? 'red'
                   : colorFromPosition(block.position),
+                borderRadius: '50%',
               }}
             >
               {block.title} (X:{Math.round(block.position.x)} Y:
@@ -76,13 +79,14 @@ const RectangleBoard = <T extends WithTitle>({
             }}
           >
             <div
-              className="dragging-block"
+              className="rounded-lg border border-gray-300 flex items-center justify-center"
               style={{
                 width: draggingBlock.size.width,
                 height: draggingBlock.size.height,
                 background: collidedIds?.includes(draggingBlock.id)
                   ? 'red'
                   : colorFromPositionAlpha(draggingBlock.position, 0.2),
+                borderRadius: '50%',
               }}
             >
               {draggingBlock.title} (X:{Math.round(draggingBlock.position.x)} Y:
@@ -95,4 +99,4 @@ const RectangleBoard = <T extends WithTitle>({
   );
 };
 
-export default RectangleBoard;
+export default CircleBoard;

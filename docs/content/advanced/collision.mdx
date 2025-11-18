@@ -1,0 +1,25 @@
+---
+title: 충돌 모드
+description: Rectangle / Circle / OBB 충돌 처리 비교와 사용법
+---
+
+# 충돌 모드
+
+## rectangle (AABB)
+
+- 축 정렬 박스 빠른 충돌
+- 경계가 맞닿으면 비충돌로 처리
+
+## circle
+
+- 원 근사 충돌(최소 변 기준 반지름)
+- 가벼운 근사치가 필요할 때
+
+## obb (Oriented Bounding Box)
+
+- 회전된 박스의 분리축 정리(SAT) 기반
+- 가장 정확하지만 상대적으로 비용이 큼
+
+```ts
+collisionOptions: { enabled: true, mode: 'obb' }
+```

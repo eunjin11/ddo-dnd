@@ -1,0 +1,37 @@
+---
+title: 컴포넌트 API
+description: DragContainer / DraggableItem / DraggingItem
+---
+
+# 컴포넌트
+
+## DragContainer
+
+```ts
+type Props = {
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  children: React.ReactNode;
+  onDrop?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+};
+```
+
+## DraggableItem
+
+```ts
+type Props = {
+  position: { x: number; y: number };
+  isDragging: boolean;
+  handleStartDrag: (e: React.PointerEvent<HTMLDivElement>) => void;
+  children: React.ReactNode;
+};
+```
+
+## DraggingItem
+
+```ts
+type Props = {
+  position: { x: number; y: number };
+  children: React.ReactNode;
+};
+```

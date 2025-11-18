@@ -1,0 +1,71 @@
+---
+title: 기본 사용법
+description: 컨테이너 구성, 드래그 시작/종료 흐름
+---
+
+# 기본 사용법
+
+ddo-dnd는 컨테이너/아이템 컴포넌트와 훅 조합으로 구성됩니다.
+
+- `DragContainer`: 드래그 영역 루트
+- `DraggableItem`: 실제 렌더링되는 블록
+- `DraggingItem`: 포인터를 따라다니는 고스트
+- `useDragBlock`: 드래그 로직(좌표 스냅, 경계 체크, 충돌 처리)
+
+```tsx
+<DragContainer containerRef={containerRef}>
+  <DraggableItem
+    position={block.position}
+    isDragging={draggingBlock?.id === block.id}
+    handleStartDrag={e => handleStartDrag((e as any).nativeEvent, block)}
+  >
+    <div style={{ width: block.size.width, height: block.size.height }}>
+      {/* contents */}
+    </div>
+  </DraggableItem>
+
+  {dragPointerPosition && draggingBlock && (
+    <DraggingItem
+      position={{
+        x: dragPointerPosition.x - dragOffset.x,
+        y: dragPointerPosition.y - dragOffset.y,
+      }}
+    >
+      <div
+        style={{
+          width: draggingBlock.size.width,
+          height: draggingBlock.size.height,
+        }}
+      >
+        {/* ghost */}
+      </div>
+    </DraggingItem>
+  )}
+</DragContainer>
+```
+
+## 충돌 옵션
+
+```ts
+collisionOptions?: {
+  enabled?: boolean;          // 기본 false
+  mode?: 'rectangle'|'circle'|'obb'; // 기본 'rectangle'
+}
+```
+
+- rectangle: AABB 빠른 충돌
+- circle: 원 근사 충돌
+- obb: 회전 박스(정확, 상대적으로 비용 큼)
+
+## 타입 확장
+
+`BlockType`을 확장하여 도메인 필드를 추가하세요.
+
+```ts
+import type { BlockType } from 'ddo-dnd';
+
+type MyBlock = BlockType & {
+  title: string;
+  color?: string;
+};
+```

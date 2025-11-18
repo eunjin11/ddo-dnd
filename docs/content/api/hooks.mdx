@@ -1,0 +1,83 @@
+---
+title: 훅 API
+description: useDragBlock / useRotateBlock / useBlocksTransition / useSetPointerEvents
+---
+
+# 훅
+
+## useDragBlock
+
+```ts
+type UseDragBlockProps<T extends BlockType> = {
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  scrollOffset: number;
+  workBlocks: T[];
+  updateWorkBlockCallback: (updatedBlock: T) => void;
+  updateWorkBlocks: (blocks: T[]) => void;
+  collisionOptions?: {
+    enabled?: boolean;
+    mode?: 'rectangle' | 'circle' | 'obb';
+  };
+  snapToGridOptions?: {
+    enabled?: boolean;
+    gridSize?: number;
+  };
+};
+```
+
+반환
+
+```ts
+{
+  draggingBlock: T | null;
+  dragPointerPosition: { x: number; y: number } | null;
+  dragOffset: { x: number; y: number };
+  handleStartDrag: (e: PointerEvent, block: T) => void;
+  collidedIds: number[];
+}
+```
+
+## useRotateBlock
+
+```ts
+type UseRotateBlockProps<T extends BlockType> = {
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  scrollOffset: number;
+  workBlocks: T[];
+  updateWorkBlockCallback: (updatedBlock: T) => void;
+  updateWorkBlocks: (blocks: T[]) => void;
+  collisionOptions?: {
+    enabled?: boolean;
+    mode?: 'obb' | 'rectangle' | 'circle';
+  };
+};
+```
+
+반환
+
+```ts
+{
+  rotatingBlock: T | null;
+  handleStartRotate: (e: PointerEvent, block: T) => void;
+  collidedIds: number[];
+}
+```
+
+## useBlocksTransition
+
+```ts
+const { animateBlocksTransition } = useBlocksTransition<T>(updateWorkBlocks);
+```
+
+```ts
+animateBlocksTransition(prevBlocks: T[], nextBlocks: T[], durationMs = 250)
+```
+
+## useSetPointerEvents
+
+```ts
+useSetPointerEvents({
+  onPointerMove?: (e: PointerEvent) => void;
+  onPointerUp?: (e: PointerEvent) => void;
+})
+```

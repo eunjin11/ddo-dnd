@@ -1,3 +1,5 @@
+'use client';
+
 import { type RefObject } from 'react';
 import {
   DragContainer,
@@ -65,7 +67,7 @@ const OBBBoard = <T extends WithAngle>({
 
   return (
     <DragContainer containerRef={containerRef}>
-      <div className="board">
+      <div className="relative w-[600px] h-[320px] border border-dashed border-gray-400 bg-gray-100 select-none">
         {blocks.map(block => (
           <DraggableItem
             key={block.id}
@@ -78,9 +80,8 @@ const OBBBoard = <T extends WithAngle>({
             }}
           >
             <div
-              className="draggable-block"
+              className="relative rounded-lg border border-gray-300 shadow flex items-center justify-center text-sm"
               style={{
-                position: 'relative',
                 width: block.size.width,
                 height: block.size.height,
                 transform: `rotate(${block.angle ?? 0}deg)`,
@@ -140,7 +141,7 @@ const OBBBoard = <T extends WithAngle>({
             }}
           >
             <div
-              className="dragging-block"
+              className="rounded-lg border border-gray-300 flex items-center justify-center"
               style={{
                 width: draggingBlock.size.width,
                 height: draggingBlock.size.height,
@@ -165,7 +166,7 @@ const OBBBoard = <T extends WithAngle>({
             }}
           >
             <div
-              className="dragging-block"
+              className="rounded-lg border border-gray-300 flex items-center justify-content"
               style={{
                 width: rotatingBlock.size.width,
                 height: rotatingBlock.size.height,
