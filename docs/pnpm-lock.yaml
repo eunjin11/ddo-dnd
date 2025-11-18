@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       ddo-dnd:
-        specifier: link:../../src
-        version: link:../../src
+        specifier: link:..
+        version: link:..
       next:
         specifier: 16.0.3
         version: 16.0.3(@babel/core@7.28.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -29,9 +29,6 @@ importers:
       shiki:
         specifier: ^3.15.0
         version: 3.15.0
-      src:
-        specifier: link:../../src
-        version: link:../../src
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4

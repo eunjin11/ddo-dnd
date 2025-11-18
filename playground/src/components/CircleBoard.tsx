@@ -6,7 +6,7 @@ import {
   useDragBlock,
   type BlockType,
   useCollisionDetection,
-} from '../../../src';
+} from 'ddo-dnd';
 import { colorFromPosition, colorFromPositionAlpha } from '../utils/color';
 
 type WithTitle = BlockType & { title: string };

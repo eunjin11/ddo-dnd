@@ -7,9 +7,9 @@ import {
   DraggingItem,
   useDragBlock,
   type BlockType,
+  useCollisionDetection,
 } from 'ddo-dnd';
 import { colorFromPosition, colorFromPositionAlpha } from '../utils/color';
-import { useCollisionDetection } from '../../../src/hooks/useCollisionDetection';
 
 type WithTitle = BlockType & { title: string };
 
@@ -44,7 +44,7 @@ const RectangleBoard = <T extends WithTitle>({
 
   return (
     <DragContainer containerRef={containerRef}>
-      <div className="board">
+      <div className="relative w-[600px] h-[320px] border border-dashed border-gray-400 bg-gray-100 select-none">
         {blocks.map(block => (
           <DraggableItem
             key={block.id}
@@ -55,7 +55,7 @@ const RectangleBoard = <T extends WithTitle>({
             }}
           >
             <div
-              className="draggable-block"
+              className="rounded-lg border border-gray-300 shadow flex items-center justify-center text-sm"
               style={{
                 width: block.size.width,
                 height: block.size.height,
@@ -78,7 +78,7 @@ const RectangleBoard = <T extends WithTitle>({
             }}
           >
             <div
-              className="dragging-block"
+              className="rounded-lg border border-gray-300 flex items-center justify-center"
               style={{
                 width: draggingBlock.size.width,
                 height: draggingBlock.size.height,

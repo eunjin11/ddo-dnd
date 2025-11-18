@@ -5,10 +5,10 @@ import {
   DraggingItem,
   useDragBlock,
   type BlockType,
-} from '../../../src';
-import { useRotateBlock } from '../../../src';
+  useCollisionDetection,
+  useRotateBlock,
+} from 'ddo-dnd';
 import { colorFromPosition, colorFromPositionAlpha } from '../utils/color';
-import { useCollisionDetection } from '../../../src/hooks/useCollisionDetection';
 
 type WithAngle = BlockType & { title: string; angle?: number };
 
