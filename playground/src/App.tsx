@@ -94,29 +94,36 @@ function App() {
       <h2>ddo-dnd playground</h2>
       <p className="subtitle">블록을 드래그하여 위치를 변경해 보세요.</p>
 
-      <h3 className="subtitle">Rectangle collision</h3>
-      <RectangleBoard<MyBlock>
-        containerRef={containerRef}
-        scrollOffset={scrollOffset}
-        blocks={blocks}
-        setBlocks={setBlocks}
-      />
+      <div className="board-row">
+        <div className="flex-column">
+          <h3 className="subtitle">Rectangle collision</h3>
+          <RectangleBoard<MyBlock>
+            containerRef={containerRef}
+            scrollOffset={scrollOffset}
+            blocks={blocks}
+            setBlocks={setBlocks}
+          />
+        </div>
 
-      <h3 className="subtitle">OBB collision</h3>
-      <OBBBoard<MyBlock>
-        containerRef={containerRef}
-        scrollOffset={scrollOffset}
-        blocks={blocksOBB}
-        setBlocks={setBlocksOBB}
-      />
-
-      <h3 className="subtitle">Circle collision</h3>
-      <CircleBoard<MyBlock>
-        containerRef={containerRefCircle}
-        scrollOffset={scrollOffset}
-        blocks={blocksCircle}
-        setBlocks={setBlocksCircle}
-      />
+        <div className="flex-column">
+          <h3 className="subtitle">OBB collision</h3>
+          <OBBBoard<MyBlock>
+            containerRef={containerRef}
+            scrollOffset={scrollOffset}
+            blocks={blocksOBB}
+            setBlocks={setBlocksOBB}
+          />
+        </div>
+      </div>
+      <div className="flex-column">
+        <h3 className="subtitle">Circle collision</h3>
+        <CircleBoard<MyBlock>
+          containerRef={containerRefCircle}
+          scrollOffset={scrollOffset}
+          blocks={blocksCircle}
+          setBlocks={setBlocksCircle}
+        />
+      </div>
     </div>
   );
 }

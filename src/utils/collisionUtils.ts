@@ -204,7 +204,6 @@ export const resolveCollision = <T extends BlockType>({
       collisionType
     )
   ) {
-    // 현재 블록이 가득차있는 블록이면 y좌표를 증가하여 생성
     const newPosition = {
       x: activeBlock.position.x,
       y: activeBlock.position.y, // TODO: 충돌 처리 후 이동 가능한 위치 반환
