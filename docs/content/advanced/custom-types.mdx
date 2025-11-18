@@ -1,0 +1,23 @@
+---
+title: 타입 확장과 제네릭
+description: BlockType 확장과 제네릭 훅 사용하기
+---
+
+# 타입 확장
+
+```ts
+import type { BlockType } from 'ddo-dnd';
+
+type MyBlock = BlockType & {
+  title: string;
+  color?: string;
+};
+```
+
+## 제네릭 훅
+
+```ts
+useDragBlock<MyBlock>({ workBlocks, updateWorkBlocks, ... })
+useRotateBlock<MyBlock>({ workBlocks, updateWorkBlocks, ... })
+useBlocksTransition<MyBlock>(updateWorkBlocks)
+```

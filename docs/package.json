@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "ddo-dnd": "link:../src",
     "next": "16.0.3",
     "nextra": "^4.6.0",
     "nextra-theme-docs": "^4.6.0",
