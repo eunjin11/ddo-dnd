@@ -5,9 +5,9 @@ import {
   DraggingItem,
   useDragBlock,
   type BlockType,
+  useCollisionDetection,
 } from '../../../src';
 import { colorFromPosition, colorFromPositionAlpha } from '../utils/color';
-import { useCollisionDetection } from '../../../src/hooks/useCollisionDetection';
 
 type WithTitle = BlockType & { title: string };
 
