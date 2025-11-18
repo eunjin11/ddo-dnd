@@ -16,7 +16,7 @@ Open in your browser: `http://localhost:5173`
 
 ## Demo
 
-https://github.com/user-attachments/assets/14789453-d2f0-47d4-840a-5c9041f353fe
+https://github.com/user-attachments/assets/c8679827-f2cb-49ae-a5a4-c7aa7a3cf80f
 
 ## API
 
