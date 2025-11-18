@@ -2,7 +2,7 @@
 
 > 또 쓰고 싶은 dnd 라이브러리, ddo-dnd
 
-A lightweight drag-and-drop (DnD) library for React. It offers coordinate-based dragging, grid snapping, and collision checking with a simple API. The repository root contains the library, and `playground/` contains a runnable demo.
+A lightweight drag-and-drop (DnD) library for React. It offers coordinate-based dragging, grid snapping, and collision checking with a simple API, including multiple collision modes: rectangle (AABB), circle, and OBB (Oriented Bounding Box). The repository root contains the library, and `playground/` contains a runnable demo.
 
 ## Install & Run
 
@@ -16,7 +16,7 @@ Open in your browser: `http://localhost:5173`
 
 ## Demo
 
-https://github.com/user-attachments/assets/14789453-d2f0-47d4-840a-5c9041f353fe
+https://github.com/user-attachments/assets/c8679827-f2cb-49ae-a5a4-c7aa7a3cf80f
 
 ## API
 

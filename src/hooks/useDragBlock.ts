@@ -5,23 +5,34 @@ import { useBlocksTransition } from './useBlocksTransition';
 import { useSetPointerEvents } from './useSetPointerEvents';
 import { snapPositionToGrid } from '../utils/snapToGridUtil';
 import type { BlockType } from '../types';
-import { resolveCollision } from '../utils';
+import { resolveCollision, type CollisionType } from '../utils';
 import { getNewBlocks } from '../utils/blockUtils.ts';
+import { useCollisionDetection } from './useCollisionDetection';
 
 interface UseDragBlockProps<T extends BlockType> {
   containerRef: RefObject<HTMLDivElement | null>;
   scrollOffset: number;
   workBlocks: T[];
-  updateWorkBlockTimeOnServer: (updatedBlock: T) => void;
+  updateWorkBlockCallback: (updatedBlock: T) => void;
   updateWorkBlocks: (blocks: T[]) => void;
+  collisionOptions?: {
+    enabled?: boolean;
+    mode?: CollisionType;
+  };
+  snapToGridOptions?: {
+    enabled?: boolean;
+    gridSize?: number;
+  };
 }
 
 export const useDragBlock = <T extends BlockType>({
   containerRef,
   scrollOffset,
   workBlocks,
-  updateWorkBlockTimeOnServer,
+  updateWorkBlockCallback,
   updateWorkBlocks,
+  collisionOptions = { enabled: false, mode: 'rectangle' },
+  snapToGridOptions = { enabled: false, gridSize: 0 },
 }: UseDragBlockProps<T>) => {
   const [draggingBlock, setDraggingBlock] = useState<T | null>(null);
   //렌더링 시에만 사용하는 위치, scrollOffset 보정 x
@@ -30,6 +41,13 @@ export const useDragBlock = <T extends BlockType>({
 
   //마우스 위치와 블록 위치 차이
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
+  const { computeCollisions, setCollidedIds } = useCollisionDetection<T>();
+
+  const enableCollision = collisionOptions?.enabled ?? false;
+  const collisionType: CollisionType = collisionOptions?.mode ?? 'rectangle';
+
+  const enableSnapToGrid = snapToGridOptions?.enabled ?? false;
+  const gridSize = snapToGridOptions?.gridSize ?? 0;
 
   // 블록 이동 애니메이션 훅
   const { animateBlocksTransition } = useBlocksTransition<T>(updateWorkBlocks);
@@ -71,18 +89,30 @@ export const useDragBlock = <T extends BlockType>({
         y: containerCoords.y - dragOffset.y,
       };
 
-      // 6px 그리드에 스냅 (y는 validY로 제한)
-      const snappedPosition = snapPositionToGrid({
-        x: newPosition.x,
-        y: newPosition.y,
-      });
+      // 그리드 스냅 처리
+      const snappedPosition = enableSnapToGrid
+        ? snapPositionToGrid(
+            {
+              x: newPosition.x,
+              y: newPosition.y,
+            },
+            gridSize ?? 0
+          )
+        : newPosition;
 
       setDraggingBlock({
         ...draggingBlock,
         position: snappedPosition,
       });
     },
-    [draggingBlock, dragOffset, getContainerCoords, scrollOffset]
+    [
+      draggingBlock,
+      dragOffset,
+      getContainerCoords,
+      scrollOffset,
+      enableSnapToGrid,
+      gridSize,
+    ]
   );
 
   const handleEndDrag = useCallback(() => {
@@ -108,6 +138,7 @@ export const useDragBlock = <T extends BlockType>({
         getNewBlocks(workBlocks, currentDraggingBlock),
         workBlocks
       );
+      setCollidedIds([]);
       return;
     }
 
@@ -117,18 +148,28 @@ export const useDragBlock = <T extends BlockType>({
       workBlocks,
       containerRef,
       scrollOffset,
+      collisionType,
     });
 
     animateBlocksTransition(newBlocks, sortedBlocks);
+    updateWorkBlockCallback(updatedBlock);
+    // 드랍 후 충돌 블록 id 계산
 
-    updateWorkBlockTimeOnServer(updatedBlock);
+    if (enableCollision) {
+      // enableCollision 옵션이 활성화되어 있으면 충돌 처리
+      computeCollisions(newBlocks, collisionType);
+    }
   }, [
     animateBlocksTransition,
     containerRef,
     draggingBlock,
     scrollOffset,
-    updateWorkBlockTimeOnServer,
+    updateWorkBlockCallback,
     workBlocks,
+    computeCollisions,
+    enableCollision,
+    collisionType,
+    setCollidedIds,
   ]);
 
   useSetPointerEvents({

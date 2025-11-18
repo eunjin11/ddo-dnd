@@ -1,0 +1,121 @@
+---
+title: 시작하기
+description: ddo-dnd 설치와 기본 사용법
+---
+
+# 설치
+
+```bash
+# pnpm
+pnpm add ddo-dnd react react-dom
+
+# npm
+npm i ddo-dnd react react-dom
+
+# yarn
+yarn add ddo-dnd react react-dom
+```
+
+필수 버전
+
+- React 18+
+- TypeScript(선택) 5+
+
+## 빠른 시작
+
+```tsx
+import { useRef, useState } from 'react';
+import {
+  DragContainer,
+  DraggableItem,
+  DraggingItem,
+  useDragBlock,
+  type BlockType,
+} from 'ddo-dnd';
+
+type MyBlock = BlockType & { title: string };
+
+export default function Demo() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [blocks, setBlocks] = useState<MyBlock[]>([
+    {
+      id: 1,
+      title: 'A',
+      position: { x: 40, y: 40 },
+      size: { width: 120, height: 60 },
+    },
+    {
+      id: 2,
+      title: 'B',
+      position: { x: 220, y: 40 },
+      size: { width: 120, height: 60 },
+    },
+  ]);
+
+  const { draggingBlock, dragPointerPosition, handleStartDrag, dragOffset } =
+    useDragBlock<MyBlock>({
+      containerRef,
+      scrollOffset: 0,
+      workBlocks: blocks,
+      updateWorkBlockCallback: updated =>
+        setBlocks(prev => prev.map(b => (b.id === updated.id ? updated : b))),
+      updateWorkBlocks: setBlocks,
+      collisionOptions: { enabled: true, mode: 'rectangle' },
+    });
+
+  return (
+    <DragContainer containerRef={containerRef}>
+      <div
+        style={{
+          position: 'relative',
+          width: 600,
+          height: 320,
+          border: '1px dashed #999',
+        }}
+      >
+        {blocks.map(block => (
+          <DraggableItem
+            key={block.id}
+            position={block.position}
+            isDragging={draggingBlock?.id === block.id}
+            handleStartDrag={e =>
+              handleStartDrag((e as any).nativeEvent, block)
+            }
+          >
+            <div
+              style={{
+                width: block.size.width,
+                height: block.size.height,
+                border: '1px solid #ccc',
+              }}
+            >
+              {block.title}
+            </div>
+          </DraggableItem>
+        ))}
+
+        {dragPointerPosition && draggingBlock && (
+          <DraggingItem
+            position={{
+              x: dragPointerPosition.x - dragOffset.x,
+              y: dragPointerPosition.y - dragOffset.y,
+            }}
+          >
+            <div
+              style={{
+                width: draggingBlock.size.width,
+                height: draggingBlock.size.height,
+                border: '1px solid #bbb',
+              }}
+            >
+              {draggingBlock.title}
+            </div>
+          </DraggingItem>
+        )}
+      </div>
+    </DragContainer>
+  );
+}
+```
+
+다음으로 [사용법](./usage)과 [API](./api/components) 문서를 참고하세요.

@@ -1,18 +1,17 @@
+'use client';
+
 import { useRef, useState } from 'react';
-import './App.css';
-import { type BlockType } from '../../src';
-import RectangleBoard from './components/RectangleBoard';
-import CircleBoard from './components/CircleBoard';
-import OBBBoard from './components/OBBBoard';
+import { type BlockType } from 'ddo-dnd';
+import RectangleBoard from './RectangleBoard';
+import CircleBoard from './CircleBoard';
+import OBBBoard from './OBBBoard';
 
 interface MyBlock extends BlockType {
   title: string;
   color?: string;
 }
 
-// color helpers moved to playground/src/utils/color.ts
-
-function App() {
+function Demo() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerRefCircle = useRef<HTMLDivElement | null>(null);
   const [scrollOffset] = useState(0);
@@ -87,16 +86,18 @@ function App() {
     },
   ]);
 
-  // kept for reference: updates happen inside board components
-
   return (
-    <div className="app">
-      <h2>ddo-dnd playground</h2>
-      <p className="subtitle">블록을 드래그하여 위치를 변경해 보세요.</p>
-
-      <div className="board-row">
-        <div className="flex-column">
-          <h3 className="subtitle">Rectangle collision</h3>
+    <div className="p-10 justify-center flex flex-col items-center">
+      <h2 className="text-2xl font-semibold">ddo-dnd playground</h2>
+      <p className="mb-3 text-gray-600">
+        블록이 충돌 시 빨간색으로 표시됩니다.
+      </p>
+      <div className="flex gap-6">
+        <div className="flex flex-col items-center">
+          <h3 className="mb-3 font-semibold">Rectangle collision</h3>
+          <p className="mb-3 text-gray-600">
+            블록을 드래그하여 위치를 변경해 보세요.
+          </p>
           <RectangleBoard<MyBlock>
             containerRef={containerRef}
             scrollOffset={scrollOffset}
@@ -105,8 +106,11 @@ function App() {
           />
         </div>
 
-        <div className="flex-column">
-          <h3 className="subtitle">OBB collision</h3>
+        <div className="flex flex-col items-center">
+          <h3 className="mb-3 font-semibold">OBB collision</h3>
+          <p className="mb-3 text-gray-600">
+            모서리를 잡고 회전시킨 후 충돌을 확인해 보세요.
+          </p>
           <OBBBoard<MyBlock>
             containerRef={containerRef}
             scrollOffset={scrollOffset}
@@ -115,8 +119,9 @@ function App() {
           />
         </div>
       </div>
-      <div className="flex-column">
-        <h3 className="subtitle">Circle collision</h3>
+      <div className="flex flex-col items-center mt-6">
+        <h3 className="mb-3 font-semibold">Circle collision</h3>
+        <p className="mb-3 text-gray-600">원이 충돌되는지 확인해 보세요.</p>
         <CircleBoard<MyBlock>
           containerRef={containerRefCircle}
           scrollOffset={scrollOffset}
@@ -128,4 +133,4 @@ function App() {
   );
 }
 
-export default App;
+export default Demo;
