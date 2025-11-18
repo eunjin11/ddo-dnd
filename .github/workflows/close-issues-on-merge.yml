@@ -1,8 +1,14 @@
 name: Close issues on PR merge into develop
 
+on:
   pull_request:
     types: [closed]
     branches: [develop]
+
+permissions:
+  issues: write
+  pull-requests: read
+  contents: read
 
 jobs:
   close-issues:
