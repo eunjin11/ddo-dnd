@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import type { BlockType } from '../types';
 import { hasCollision, type CollisionType } from '../utils';
+import { setCollisionIds, useCollisionIds } from '../store/collisionStore';
 
 export const useCollisionDetection = <T extends BlockType>() => {
-  const [collidedIds, setCollidedIds] = useState<number[]>([]);
+  const collidedIds = useCollisionIds();
 
   const computeCollisions = useCallback(
     (blocks: T[], mode: CollisionType = 'rectangle') => {
@@ -17,11 +18,21 @@ export const useCollisionDetection = <T extends BlockType>() => {
         }
       }
       const result = Array.from(next);
-      setCollidedIds(result);
+      if (
+        collidedIds.length === result.length &&
+        collidedIds.every(id => result.includes(id))
+      ) {
+        return result;
+      }
+      setCollisionIds(result);
       return result;
     },
-    []
+    [collidedIds]
   );
 
-  return { collidedIds, computeCollisions, setCollidedIds };
+  return {
+    collidedIds,
+    computeCollisions,
+    setCollidedIds: setCollisionIds,
+  };
 };

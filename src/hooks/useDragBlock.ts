@@ -41,8 +41,7 @@ export const useDragBlock = <T extends BlockType>({
 
   //마우스 위치와 블록 위치 차이
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
-  const { collidedIds, computeCollisions, setCollidedIds } =
-    useCollisionDetection<T>();
+  const { computeCollisions, setCollidedIds } = useCollisionDetection<T>();
 
   const enableCollision = collisionOptions?.enabled ?? false;
   const collisionType: CollisionType = collisionOptions?.mode ?? 'rectangle';
@@ -168,9 +167,9 @@ export const useDragBlock = <T extends BlockType>({
     updateWorkBlockCallback,
     workBlocks,
     computeCollisions,
-    setCollidedIds,
     enableCollision,
     collisionType,
+    setCollidedIds,
   ]);
 
   useSetPointerEvents({
@@ -183,6 +182,5 @@ export const useDragBlock = <T extends BlockType>({
     dragPointerPosition,
     dragOffset,
     handleStartDrag,
-    collidedIds,
   };
 };
