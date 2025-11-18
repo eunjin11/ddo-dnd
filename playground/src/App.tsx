@@ -20,7 +20,7 @@ function App() {
   const [blocks, setBlocks] = useState<MyBlock[]>(() => [
     {
       id: 1,
-      position: { x: 40, y: 40 },
+      position: { x: 60, y: 30 },
       size: { width: 120, height: 60 },
       title: 'Block A',
       color: '#fff',
@@ -43,26 +43,26 @@ function App() {
 
   const [blocksOBB, setBlocksOBB] = useState<MyBlock[]>(() => [
     {
-      id: 1,
-      position: { x: 40, y: 40 },
+      id: 4,
+      position: { x: 60, y: 40 },
       size: { width: 120, height: 60 },
       angle: 0,
       title: 'Block A',
       color: '#fff',
     },
     {
-      id: 2,
-      position: { x: 220, y: 40 },
+      id: 5,
+      position: { x: 220, y: 60 },
       size: { width: 120, height: 60 },
-      angle: 0,
+      angle: 15,
       title: 'Block B',
       color: '#fff',
     },
     {
-      id: 3,
-      position: { x: 40, y: 120 },
+      id: 6,
+      position: { x: 90, y: 140 },
       size: { width: 120, height: 60 },
-      angle: 0,
+      angle: -20,
       title: 'Block C',
       color: '#fff',
     },

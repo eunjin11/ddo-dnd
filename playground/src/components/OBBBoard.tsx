@@ -8,6 +8,7 @@ import {
 } from '../../../src';
 import { useRotateBlock } from '../../../src';
 import { colorFromPosition, colorFromPositionAlpha } from '../utils/color';
+import { useCollisionDetection } from '../../../src/hooks/useCollisionDetection';
 
 type WithAngle = BlockType & { title: string; angle?: number };
 
@@ -27,21 +28,17 @@ const OBBBoard = <T extends WithAngle>({
   const updateWorkBlockCallback = (updated: T) => {
     setBlocks(prev => prev.map(b => (b.id === updated.id ? updated : b)));
   };
+  const { collidedIds } = useCollisionDetection<T>();
 
-  const {
-    draggingBlock,
-    dragPointerPosition,
-    handleStartDrag,
-    dragOffset,
-    collidedIds,
-  } = useDragBlock<T>({
-    containerRef,
-    scrollOffset,
-    workBlocks: blocks,
-    updateWorkBlockCallback,
-    updateWorkBlocks: setBlocks,
-    collisionOptions: { enabled: true, mode: 'obb' },
-  });
+  const { draggingBlock, dragPointerPosition, handleStartDrag, dragOffset } =
+    useDragBlock<T>({
+      containerRef,
+      scrollOffset,
+      workBlocks: blocks,
+      updateWorkBlockCallback,
+      updateWorkBlocks: setBlocks,
+      collisionOptions: { enabled: true, mode: 'obb' },
+    });
 
   const {
     rotatingBlock,

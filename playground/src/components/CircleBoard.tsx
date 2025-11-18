@@ -7,6 +7,7 @@ import {
   type BlockType,
 } from '../../../src';
 import { colorFromPosition, colorFromPositionAlpha } from '../utils/color';
+import { useCollisionDetection } from '../../../src/hooks/useCollisionDetection';
 
 type WithTitle = BlockType & { title: string };
 
@@ -27,20 +28,17 @@ const CircleBoard = <T extends WithTitle>({
     setBlocks(prev => prev.map(b => (b.id === updated.id ? updated : b)));
   };
 
-  const {
-    draggingBlock,
-    dragPointerPosition,
-    handleStartDrag,
-    dragOffset,
-    collidedIds,
-  } = useDragBlock<T>({
-    containerRef,
-    scrollOffset,
-    workBlocks: blocks,
-    updateWorkBlockCallback,
-    updateWorkBlocks: setBlocks,
-    collisionOptions: { enabled: true, mode: 'circle' },
-  });
+  const { collidedIds } = useCollisionDetection<T>();
+
+  const { draggingBlock, dragPointerPosition, handleStartDrag, dragOffset } =
+    useDragBlock<T>({
+      containerRef,
+      scrollOffset,
+      workBlocks: blocks,
+      updateWorkBlockCallback,
+      updateWorkBlocks: setBlocks,
+      collisionOptions: { enabled: true, mode: 'circle' },
+    });
 
   return (
     <DragContainer containerRef={containerRef}>
