@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'develop'
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm -r install --frozen-lockfile
+
+      - name: Build src
+        id: build_core
+        run: pnpm build
+        continue-on-error: true
+
+      - name: Build playground
+        id: build_playground
+        run: pnpm -C playground build
+        continue-on-error: true
+
+      - name: Build docs
+        id: build_docs
+        run: pnpm -C docs build
+        continue-on-error: true
+
+      - name: Fail if any build failed
+        if: ${{ steps.build_core.outcome == 'failure' || steps.build_playground.outcome == 'failure' || steps.build_docs.outcome == 'failure' }}
+        run: exit 1
