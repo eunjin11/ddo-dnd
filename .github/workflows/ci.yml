@@ -42,6 +42,7 @@ jobs:
 
       - name: Test (core)
         run: pnpm test
+
       - name: Build packages/core
         id: build_core
         run: pnpm -C packages/core build
