@@ -1,17 +1,11 @@
 name: CI
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
     branches:
-      - main
-      - develop
-      - 'feat/**'
-  # pull_request:
-  #   types: [opened, synchronize, reopened, closed]
-  #   branches:
-  #     - 'main'
-  #     - 'develop'
-  #     - 'feat/**'
+      - 'main'
+      - 'develop'
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -20,9 +14,14 @@ concurrency:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
@@ -43,6 +42,46 @@ jobs:
 
       - name: Test (core)
         run: pnpm test
+      - name: Build packages/core
+        id: build_core
+        run: pnpm -C packages/core build
+        continue-on-error: true
 
-      - name: Build (core then apps)
-        run: pnpm -w build
+      - name: Build apps/playground
+        id: build_playground
+        run: pnpm -C apps/playground build
+        continue-on-error: true
+
+      - name: Build apps/docs
+        id: build_docs
+        run: pnpm -C apps/docs build
+        continue-on-error: true
+
+      - name: Comment build results on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const mkLine = (name, outcome) =>
+              (outcome === 'success'
+                ? `✅ ${name} 빌드 테스트 성공! 🎉`
+                : `❌ ${name} 빌드 테스트 실패 😭`);
+            const coreOutcome = '${{ steps.build_core.outcome }}';
+            const playgroundOutcome = '${{ steps.build_playground.outcome }}';
+            const docsOutcome = '${{ steps.build_docs.outcome }}';
+            const comment =
+              [
+                mkLine('packages/core', coreOutcome),
+                mkLine('apps/playground', playgroundOutcome),
+                mkLine('apps/docs', docsOutcome),
+              ].join('\n\n');
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.payload.pull_request.number,
+              body: comment
+            });
+
+      - name: Fail if any build failed
+        if: ${{ steps.build_core.outcome == 'failure' || steps.build_playground.outcome == 'failure' || steps.build_docs.outcome == 'failure' }}
+        run: exit 1
