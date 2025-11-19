@@ -6,6 +6,17 @@ A lightweight drag-and-drop (DnD) library for React. It offers coordinate-based 
 
 ## Install & Run
 
+```bash
+# pnpm
+pnpm add ddo-dnd react react-dom
+
+# npm
+npm i ddo-dnd react react-dom
+
+# yarn
+yarn add ddo-dnd react react-dom
+```
+
 Run the dev server (playground):
 
 ```bash
