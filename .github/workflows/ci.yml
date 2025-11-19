@@ -45,7 +45,7 @@ jobs:
 
   build-core:
     runs-on: ubuntu-latest
-    needs: [lint-and-test, build-core]
+    needs: lint-and-test
     outputs:
       duration: ${{ steps.build.outputs.duration }}
     steps:
@@ -76,7 +76,7 @@ jobs:
 
   build-playground:
     runs-on: ubuntu-latest
-    needs: [lint-and-test, build-core]
+    needs: lint-and-test
     outputs:
       duration: ${{ steps.build.outputs.duration }}
     steps:
@@ -107,7 +107,7 @@ jobs:
 
   build-docs:
     runs-on: ubuntu-latest
-    needs: [lint-and-test, build-core]
+    needs: lint-and-test
     outputs:
       duration: ${{ steps.build.outputs.duration }}
     steps:
@@ -158,22 +158,22 @@ jobs:
                 ? `⚪ ${name} 빌드 스킵됨${pretty}`
                 : `❌ ${name} 빌드 테스트 실패 😭${pretty}`;
             };
-            const core = {
+            const coreBuild = {
               result: '${{ needs.build-core.result }}',
               secs: Number('${{ needs.build-core.outputs.duration }}' || 0)
             };
-            const playground = {
+            const playgroundBuild = {
               result: '${{ needs.build-playground.result }}',
               secs: Number('${{ needs.build-playground.outputs.duration }}' || 0)
             };
-            const docs = {
+            const docsBuild = {
               result: '${{ needs.build-docs.result }}',
               secs: Number('${{ needs.build-docs.outputs.duration }}' || 0)
             };
             const lines = [
-              mkLine('packages/core', core.result, core.secs),
-              mkLine('apps/playground', playground.result, playground.secs),
-              mkLine('apps/docs', docs.result, docs.secs),
+              mkLine('packages/core', coreBuild.result, coreBuild.secs),
+              mkLine('apps/playground', playgroundBuild.result, playgroundBuild.secs),
+              mkLine('apps/docs', docsBuild.result, docsBuild.secs),
             ];
             await github.rest.issues.createComment({
               ...context.repo,
