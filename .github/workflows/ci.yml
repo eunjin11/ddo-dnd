@@ -5,10 +5,13 @@ on:
     branches:
       - main
       - develop
-      - 'feature/**'
-  pull_request:
-    branches:
-      - '**'
+      - 'feat/**'
+  # pull_request:
+  #   types: [opened, synchronize, reopened, closed]
+  #   branches:
+  #     - 'main'
+  #     - 'develop'
+  #     - 'feat/**'
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
