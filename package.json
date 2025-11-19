@@ -11,6 +11,7 @@
     "build:apps": "pnpm -r --filter \"./apps/*\" build",
     "build": "pnpm -r --filter \"./packages/core\" build && pnpm -r --filter \"./apps/*\" build",
     "build:all": "pnpm run build",
+    "dev": "pnpm -C apps/playground dev",
     "dev:docs": "pnpm -C apps/docs dev",
     "dev:playground": "pnpm -C apps/playground dev",
     "test": "pnpm -F ddo-dnd test",
