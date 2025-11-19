@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import './App.css';
-import { type BlockType } from '../../src';
+import { type BlockType } from 'ddo-dnd';
 import RectangleBoard from './components/RectangleBoard';
 import CircleBoard from './components/CircleBoard';
 import OBBBoard from './components/OBBBoard';
