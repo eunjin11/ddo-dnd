@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint-and-test:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -35,41 +35,30 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm -r install --frozen-lockfile
+
+      - name: Detect changed workspaces
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            core:
+              - 'packages/core/**'
+            docs:
+              - 'apps/docs/**'
+            playground:
+              - 'apps/playground/**'
 
       - name: Lint (all workspaces)
         run: pnpm -w lint
 
       - name: Test (core)
-        run: pnpm test
-
-  build-core:
-    runs-on: ubuntu-latest
-    needs: lint-and-test
-    outputs:
-      duration: ${{ steps.build.outputs.duration }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: refs/pull/${{ github.event.pull_request.number }}/merge
-
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        if: steps.changes.outputs.core == 'true'
+        run: pnpm -C packages/core test
 
       - name: Build packages/core (timed)
-        id: build
+        id: build_core
+        if: steps.changes.outputs.core == 'true' || steps.changes.outputs.docs == 'true' || steps.changes.outputs.playground == 'true'
         run: |
           start=$(date +%s)
           set +e
@@ -79,88 +68,21 @@ jobs:
           echo "duration=$((end-start))" >> "$GITHUB_OUTPUT"
           exit $status
 
-      - name: Upload core dist artifact
-        if: ${{ success() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
-  build-docs:
-    runs-on: ubuntu-latest
-    needs: [lint-and-test, build-core]
-    outputs:
-      duration: ${{ steps.build.outputs.duration }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: refs/pull/${{ github.event.pull_request.number }}/merge
-
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Download core dist artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
       - name: Build apps/docs (timed)
-        id: build
+        id: build_docs
+        if: steps.changes.outputs.docs == 'true' || steps.changes.outputs.core == 'true'
         run: |
           start=$(date +%s)
           set +e
           pnpm -C apps/docs build
           status=$?
           end=$(date +%s)
-          echo "duration=$((end-start))" >> "$GITHUBOUTPUT"
+          echo "duration=$((end-start))" >> "$GITHUB_OUTPUT"
           exit $status
 
-  build-playground:
-    runs-on: ubuntu-latest
-    needs: [lint-and-test, build-core]
-    outputs:
-      duration: ${{ steps.build.outputs.duration }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: refs/pull/${{ github.event.pull_request.number }}/merge
-
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Download core dist artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: core-dist
-          path: packages/core/dist
-
       - name: Build apps/playground (timed)
-        id: build
+        id: build_playground
+        if: steps.changes.outputs.playground == 'true' || steps.changes.outputs.core == 'true'
         run: |
           start=$(date +%s)
           set +e
@@ -170,44 +92,30 @@ jobs:
           echo "duration=$((end-start))" >> "$GITHUB_OUTPUT"
           exit $status
 
-  report:
-    runs-on: ubuntu-latest
-    needs: [build-core, build-playground, build-docs]
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
-    if: always()
-    steps:
       - name: Comment build results on PR
+        if: always()
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const mkLine = (name, result, secs) => {
+            const mkLine = (name, outcome, secs) => {
               const pretty = secs ? ` (${Math.floor(secs/60)}m ${secs%60}s)` : '';
-              return result === 'success'
+              return outcome === 'success'
                 ? `✅ ${name} 빌드 테스트 성공! 🎉${pretty}`
-                : result === 'skipped'
+                : outcome === 'skipped'
                 ? `⚪ ${name} 빌드 스킵됨${pretty}`
                 : `❌ ${name} 빌드 테스트 실패 😭${pretty}`;
             };
-            const coreBuild = {
-              result: '${{ needs.build-core.result }}',
-              secs: Number('${{ needs.build-core.outputs.duration }}' || 0)
-            };
-            const playgroundBuild = {
-              result: '${{ needs.build-playground.result }}',
-              secs: Number('${{ needs.build-playground.outputs.duration }}' || 0)
-            };
-            const docsBuild = {
-              result: '${{ needs.build-docs.result }}',
-              secs: Number('${{ needs.build-docs.outputs.duration }}' || 0)
-            };
+            const coreOutcome = '${{ steps.build_core.outcome || 'skipped' }}';
+            const docsOutcome = '${{ steps.build_docs.outcome || 'skipped' }}';
+            const playgroundOutcome = '${{ steps.build_playground.outcome || 'skipped' }}';
+            const coreSecs = Number('${{ steps.build_core.outputs.duration || '' }}' || 0);
+            const docsSecs = Number('${{ steps.build_docs.outputs.duration || '' }}' || 0);
+            const playgroundSecs = Number('${{ steps.build_playground.outputs.duration || '' }}' || 0);
             const lines = [
-              mkLine('packages/core', coreBuild.result, coreBuild.secs),
-              mkLine('apps/playground', playgroundBuild.result, playgroundBuild.secs),
-              mkLine('apps/docs', docsBuild.result, docsBuild.secs),
+              mkLine('packages/core', coreOutcome, coreSecs),
+              mkLine('apps/playground', playgroundOutcome, playgroundSecs),
+              mkLine('apps/docs', docsOutcome, docsSecs),
             ];
             await github.rest.issues.createComment({
               ...context.repo,
@@ -216,9 +124,10 @@ jobs:
             });
 
       - name: Fail if any build failed
+        if: always()
         run: |
-          if [ "${{ needs.build-core.result }}" = "failure" ] || \
-             [ "${{ needs.build-playground.result }}" = "failure" ] || \
-             [ "${{ needs.build-docs.result }}" = "failure" ]; then
+          if [ "${{ steps.build_core.outcome }}" = "failure" ] || \
+             [ "${{ steps.build_playground.outcome }}" = "failure" ] || \
+             [ "${{ steps.build_docs.outcome }}" = "failure" ]; then
             exit 1
           fi
