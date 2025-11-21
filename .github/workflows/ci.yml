@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -37,26 +37,60 @@ jobs:
       - name: Install dependencies
         run: pnpm -r install --frozen-lockfile
 
+      - name: Detect changed workspaces
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            core:
+              - 'packages/core/**'
+            docs:
+              - 'apps/docs/**'
+            playground:
+              - 'apps/playground/**'
+
       - name: Lint (all workspaces)
         run: pnpm -w lint
 
       - name: Test (core)
-        run: pnpm test
+        if: steps.changes.outputs.core == 'true'
+        run: pnpm -C packages/core test
 
-      - name: Build packages/core
+      - name: Build packages/core (timed)
         id: build_core
-        run: pnpm -C packages/core build
-        continue-on-error: true
+        if: steps.changes.outputs.core == 'true' || steps.changes.outputs.docs == 'true' || steps.changes.outputs.playground == 'true'
+        run: |
+          start=$(date +%s)
+          set +e
+          pnpm -C packages/core build
+          status=$?
+          end=$(date +%s)
+          echo "duration=$((end-start))" >> "$GITHUB_OUTPUT"
+          exit $status
 
-      - name: Build apps/playground
-        id: build_playground
-        run: pnpm -C apps/playground build
-        continue-on-error: true
-
-      - name: Build apps/docs
+      - name: Build apps/docs (timed)
         id: build_docs
-        run: pnpm -C apps/docs build
-        continue-on-error: true
+        if: steps.changes.outputs.docs == 'true' || steps.changes.outputs.core == 'true'
+        run: |
+          start=$(date +%s)
+          set +e
+          pnpm -C apps/docs build
+          status=$?
+          end=$(date +%s)
+          echo "duration=$((end-start))" >> "$GITHUB_OUTPUT"
+          exit $status
+
+      - name: Build apps/playground (timed)
+        id: build_playground
+        if: steps.changes.outputs.playground == 'true' || steps.changes.outputs.core == 'true'
+        run: |
+          start=$(date +%s)
+          set +e
+          pnpm -C apps/playground build
+          status=$?
+          end=$(date +%s)
+          echo "duration=$((end-start))" >> "$GITHUB_OUTPUT"
+          exit $status
 
       - name: Comment build results on PR
         if: always()
@@ -64,25 +98,36 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const mkLine = (name, outcome) =>
-              (outcome === 'success'
-                ? `✅ ${name} 빌드 테스트 성공! 🎉`
-                : `❌ ${name} 빌드 테스트 실패 😭`);
-            const coreOutcome = '${{ steps.build_core.outcome }}';
-            const playgroundOutcome = '${{ steps.build_playground.outcome }}';
-            const docsOutcome = '${{ steps.build_docs.outcome }}';
-            const comment =
-              [
-                mkLine('packages/core', coreOutcome),
-                mkLine('apps/playground', playgroundOutcome),
-                mkLine('apps/docs', docsOutcome),
-              ].join('\n\n');
+            const mkLine = (name, outcome, secs) => {
+              const pretty = secs ? ` (${Math.floor(secs/60)}m ${secs%60}s)` : '';
+              return outcome === 'success'
+                ? `✅ ${name} 빌드 테스트 성공! 🎉${pretty}`
+                : outcome === 'skipped'
+                ? `⚪ ${name} 빌드 스킵됨${pretty}`
+                : `❌ ${name} 빌드 테스트 실패 😭${pretty}`;
+            };
+            const coreOutcome = '${{ steps.build_core.outcome || 'skipped' }}';
+            const docsOutcome = '${{ steps.build_docs.outcome || 'skipped' }}';
+            const playgroundOutcome = '${{ steps.build_playground.outcome || 'skipped' }}';
+            const coreSecs = Number('${{ steps.build_core.outputs.duration || '' }}' || 0);
+            const docsSecs = Number('${{ steps.build_docs.outputs.duration || '' }}' || 0);
+            const playgroundSecs = Number('${{ steps.build_playground.outputs.duration || '' }}' || 0);
+            const lines = [
+              mkLine('packages/core', coreOutcome, coreSecs),
+              mkLine('apps/playground', playgroundOutcome, playgroundSecs),
+              mkLine('apps/docs', docsOutcome, docsSecs),
+            ];
             await github.rest.issues.createComment({
               ...context.repo,
               issue_number: context.payload.pull_request.number,
-              body: comment
+              body: lines.join('\n\n')
             });
 
       - name: Fail if any build failed
-        if: ${{ steps.build_core.outcome == 'failure' || steps.build_playground.outcome == 'failure' || steps.build_docs.outcome == 'failure' }}
-        run: exit 1
+        if: always()
+        run: |
+          if [ "${{ steps.build_core.outcome }}" = "failure" ] || \
+             [ "${{ steps.build_playground.outcome }}" = "failure" ] || \
+             [ "${{ steps.build_docs.outcome }}" = "failure" ]; then
+            exit 1
+          fi
