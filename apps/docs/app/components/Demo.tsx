@@ -2,9 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { type BlockType } from 'ddo-dnd';
-import RectangleBoard from './RectangleBoard';
-import CircleBoard from './CircleBoard';
-import OBBBoard from './OBBBoard';
+import Board from './Board';
 
 interface MyBlock extends BlockType {
   title: string;
@@ -98,7 +96,8 @@ function Demo() {
           <p className="mb-3 text-gray-600">
             블록을 드래그하여 위치를 변경해 보세요.
           </p>
-          <RectangleBoard<MyBlock>
+          <Board<MyBlock>
+            mode="rectangle"
             containerRef={containerRef}
             scrollOffset={scrollOffset}
             blocks={blocks}
@@ -111,7 +110,8 @@ function Demo() {
           <p className="mb-3 text-gray-600">
             모서리를 잡고 회전시킨 후 충돌을 확인해 보세요.
           </p>
-          <OBBBoard<MyBlock>
+          <Board<MyBlock>
+            mode="obb"
             containerRef={containerRef}
             scrollOffset={scrollOffset}
             blocks={blocksOBB}
@@ -122,7 +122,8 @@ function Demo() {
       <div className="flex flex-col items-center mt-6">
         <h3 className="mb-3 font-semibold">Circle collision</h3>
         <p className="mb-3 text-gray-600">원이 충돌되는지 확인해 보세요.</p>
-        <CircleBoard<MyBlock>
+        <Board<MyBlock>
+          mode="circle"
           containerRef={containerRefCircle}
           scrollOffset={scrollOffset}
           blocks={blocksCircle}
