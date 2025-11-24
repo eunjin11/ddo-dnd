@@ -21,7 +21,6 @@ const DraggableItem = ({
         opacity: isDragging ? 0 : 1,
         touchAction: 'none',
         pointerEvents: 'auto',
-        zIndex: 1000,
       }}
       onPointerDown={handleStartDrag}
     >

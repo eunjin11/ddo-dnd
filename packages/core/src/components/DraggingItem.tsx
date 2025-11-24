@@ -16,7 +16,6 @@ const DraggingItem = ({
         transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
         touchAction: 'none',
         pointerEvents: 'none',
-        zIndex: 1000,
       }}
     >
       {children}

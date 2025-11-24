@@ -33,7 +33,7 @@ function Demo() {
     },
     {
       id: 3,
-      position: { x: 240, y: 120 },
+      position: { x: 210, y: 120 },
       size: { width: 60, height: 40 },
       title: 'Block C',
       color: '#fff',
