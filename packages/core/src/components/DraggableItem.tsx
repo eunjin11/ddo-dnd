@@ -19,6 +19,7 @@ const DraggableItem = ({
         top: 0,
         transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
         opacity: isDragging ? 0 : 1,
+        touchAction: 'none',
         pointerEvents: 'auto',
         zIndex: 1000,
       }}
