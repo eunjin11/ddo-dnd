@@ -44,7 +44,7 @@ const RectangleBoard = <T extends WithTitle>({
 
   return (
     <DragContainer containerRef={containerRef}>
-      <div className="relative w-[600px] h-[320px] border border-dashed border-gray-400 bg-gray-100 select-none">
+      <div className="relative w-[300px] md:w-[400px] h-[220px] border border-dashed border-gray-400 bg-gray-100 select-none">
         {blocks.map(block => (
           <DraggableItem
             key={block.id}
@@ -64,8 +64,7 @@ const RectangleBoard = <T extends WithTitle>({
                   : colorFromPosition(block.position),
               }}
             >
-              {block.title} (X:{Math.round(block.position.x)} Y:
-              {Math.round(block.position.y)})
+              {block.title}
             </div>
           </DraggableItem>
         ))}
@@ -87,8 +86,7 @@ const RectangleBoard = <T extends WithTitle>({
                   : colorFromPositionAlpha(draggingBlock.position, 0.2),
               }}
             >
-              {draggingBlock.title} (X:{Math.round(draggingBlock.position.x)} Y:
-              {Math.round(draggingBlock.position.y)})
+              {draggingBlock.title}
             </div>
           </DraggingItem>
         )}
