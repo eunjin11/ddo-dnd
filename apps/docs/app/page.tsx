@@ -9,7 +9,7 @@ export default function Page() {
           <div className="mx-auto mt-24 h-64 w-64 rounded-full bg-blue-400/40 dark:bg-blue-500/30" />
         </div>
 
-        <div className="mx-auto max-w-5xl px-6 py-24 md:py-28">
+        <div className="mx-auto max-w-5xl px-6 pt-24 pb-10 md:py-28">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/60 px-3 py-1 text-xs text-zinc-700 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-300">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
             Production-ready Drag & Drop for React
