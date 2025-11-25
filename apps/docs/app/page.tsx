@@ -19,7 +19,7 @@ export default function Page() {
             ddo-dnd
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-7 text-zinc-600 dark:text-zinc-400">
-            가볍고 확장 가능한 React DnD 라이브러리. 좌표 기반 드래그, 스냅,
+            가볍고 확장 가능한 React DnD 라이브러리. 좌표 기반 드래그,
             충돌(사각형/원/OBB) 지원, 제네릭 타입으로 도메인에 맞게 확장하세요.
           </p>
 
@@ -54,12 +54,12 @@ export default function Page() {
             desc="AABB(사각형), 원 근사, OBB(회전 박스)까지 상황에 맞는 충돌 모드를 선택."
           />
           <Feature
-            title="부드러운 트랜지션"
-            desc="useBlocksTransition으로 위치/크기 보간 애니메이션을 간단하게."
+            title="가벼운 용량"
+            desc="200KB 미만 사이즈로 가볍게 개발하세요."
           />
           <Feature
-            title="스냅 & 경계 체크"
-            desc="격자 스냅과 경계 범위 검사로 사용자 경험을 향상합니다."
+            title="부드러운 트랜지션"
+            desc="useBlocksTransition으로 위치/크기 보간 애니메이션을 간단하게."
           />
           <Feature
             title="작은 러닝커브"
