@@ -17,5 +17,5 @@
     "test": "pnpm -F ddo-dnd test",
     "lint": "pnpm -r lint"
   },
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
