@@ -1,0 +1,70 @@
+---
+title: Why ddo-dnd?
+description: ddo-dnd가 개발된 이유
+---
+
+# Why ddo-dnd?
+
+## ddo-dnd의 개발 목적 및 동기
+
+다른 DND 라이브러리를 사용하며 좌표 데이터로 컴포넌트의 내부 데이터를 변경하거나, 그 반대로 변경하는 데이터 동기화 작업과 드래그 이벤트에 rotate, resize 등의 추가적인 커스텀 이벤트를 추가하는 것에 어려움을 느꼈습니다.
+따라서 좌표 데이터를 직접 조정할 수 있고, 여러 이벤트를 동시에 적용할 수 있는 라이브러리를 개발하고자 합니다.
+
+또한, 다른 라이브러리로는 충돌 처리가 사각형 기준(AABB)으로 밖에 되지 않는 문제가 있습니다.
+
+![원 충돌 오류 예시](/images/collisionErrorWithCircle.png)
+
+사진과 같은 경우, 분명 원형 컴포넌트에서는 서로 충돌되지 않지만, 사각형 기준 충돌 처리 알고리즘으로는 충돌로 처리어 붉은색으로 렌더링됩니다.
+
+ddo-dnd는 이러한 문제를 해결하기 위해 원 기준의 충돌 처리를 지원합니다.
+
+또한 각도에 따라 회전하는 사각형 끼리의 디테일한 충돌 처리를 위해, 벡터 내적 연산을 통한 회전하는 사각형(OBB) 기준의 충돌 처리를 지원합니다.
+
+![OBB 충돌 예시](/images/collisionWithOBB.png)
+
+Block B와 Block C는 다른 라이브러리의 충돌 처리 방식(AABB)로는 범위 상 충돌로 인식됩니다.
+그러나 OBB는 회전 각도를 기반으로 세밀한 충돌 처리 연산을 하기 때문에, 사용자가 보고 인식하는 것과 동일하게 충돌인지 아닌지 판단할 수 있습니다.
+따라서 Block B와 Block C는 충돌로 처리되지 않고, Block A와 Block B만이 충돌로 처리되어 붉은색으로 렌더링됩니다.
+
+## 설계 철학
+
+ddo-dnd는 `쉽고 직관적으로 개발할 수 있고`, `쉽게 커스텀할 수 있는` 라이브러리를 지향합니다.
+
+쉽고 직관적으로 사용하기 위해서는 추상화가 필수적이나, 추상화를 하다보면 코드가 감추어져 커스텀이 힘들어집니다. ddo-dnd는 쉽게 사용할 수 있지만 너무 많은 정보를 감추지 않도록 고민하며 개발되고 있습니다.
+
+## 설계 구조
+
+ddo-dnd는 `<DragContainer/>` 내부에 `<DraggableItem/>`이 배열로 위치하고, 그 외부에 드래깅 여부에 따라 드래깅 중인 아이템을 별도로 렌더링하는 `<DraggingItem/>`이 위치합니다.
+이렇게 두 컴포넌트를 분리하고 다른 곳에 위치시킨 것에 의문이 들 수 있습니다.
+
+```tsx
+<DragContainer containerRef={containerRef}>
+      <div>
+        {blocks.map(block => (
+          <DraggableItem //drag 혹은 rotate가 가능한 아이템
+          </DraggableItem>
+        ))}
+
+        {draggingBlock && !rotatingBlock && (
+            <DraggingItem> //drag 중인 아이템
+            </DraggingItem>
+          )}
+
+        {!draggingBlock && rotatingBlock && (
+          <DraggingItem> //rotate 중인 아이템
+          </DraggingItem>
+        )}
+      </div>
+</DragContainer>
+```
+
+이러한 구조로 구현된 이유는 아래와 같습니다.
+
+1. 드래그 아이템이 위치한 컴포넌트에 overflow를 적용해 DraggingItem이 가려지는 효과를 의도할 경우
+   컴포넌트를 분리해서 관리하지 않으면 드래그 중인 아이템도 가려지는 문제가 발생합니다.
+2. DND UI 뿐만 아니라 rotate, resize와 같이 컴포넌트에 또다른 커스텀 이벤트를 추가할 경우,
+   상태를 분리해서 관리하지 않으면 이벤트의 흐름 제어가 어려운 문제가 발생합니다. [관련 게시글](https://github.com/softeerbootcamp-6th/Team1-ImSnacks/wiki/%5BFE%5D-%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8%EA%B0%80-%EA%B2%B9%EC%B9%A0-%EA%B2%BD%EC%9A%B0-%EC%9D%B4%EB%B2%A4%ED%8A%B8%EA%B0%80-%EB%8B%A4%EB%A5%B8-%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8%EB%A1%9C-%EC%A0%84%EB%8B%AC%EB%90%98%EB%8A%94-%EB%AC%B8%EC%A0%9C)
+
+위와 같은 이유로, 드래그가 가능한 아이템과 드래그 중인 아이템의 컴포넌트와 상태를 분리해서 관리하는 구조를 채택했습니다.
+
+현재 drag 이벤트는 `useDragBlock` 훅, rotate 이벤트는 `useRotateBlock` 훅으로 이용할 수 있습니다. resize 이벤트도 함께 관리할 수 있도록 확장할 예정입니다.
