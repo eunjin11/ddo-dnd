@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "ddo-dnd": "workspace:*",
-    "next": "16.0.3",
+    "next": "16.0.10",
     "nextra": "^4.6.0",
     "nextra-theme-docs": "^4.6.0",
     "react": "19.2.0",
